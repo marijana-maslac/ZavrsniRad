@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  recipes   Recipe[]
+  comments  Comment[]
+  ratings   Rating[]
+  favorites Favorite[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Recipe {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String
+  image        String?
+  createdAt    DateTime     @default(now())
+  difficulty   Difficulty
+  cooking_time Int
+  servings     Int
+  authorId     Int
+  author       User         @relation(fields: [authorId], references: [id])
+  category     Category
+  ingredients  Ingredient[]
+  steps        Step[]
+  comments     Comment[]
+  ratings      Rating[]
+  favorites    Favorite[]
+
+  @@index([authorId])
+  @@index([category])
+  @@index([difficulty])
+}
+
+enum Difficulty {
+  LAGANO
+  SREDNJE
+  TEŠKO
+}
+
+enum Category {
+  DORUČAK
+  RUČAK
+  VEČERA
+  VEGANSKI
+  VEGETARIJANSKI
+  FINGER_FOOD
+  GLUTEN_FREE
+  DESERTI
+  PIĆA
+  JUHE
+  RAZNO
+}
+
+model Ingredient {
+  id       Int    @id @default(autoincrement())
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  name     String
+  amount   Float?
+  unit     Unit?
+
+  @@index([recipeId])
+}
+
+enum Unit {
+  G
+  DAG
+  KG
+  ML
+  DL
+  L
+  KOM
+  TBSP
+  TSP
+}
+
+model Step {
+  id          Int     @id @default(autoincrement())
+  recipeId    Int
+  recipe      Recipe  @relation(fields: [recipeId], references: [id])
+  step_order  Int
+  description String
+  image       String?
+
+  @@unique([recipeId, step_order])
+  @@index([recipeId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.VarChar(1000)
+  image     String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([recipeId])
+  @@index([userId])
+}
+
+model Rating {
+  id       Int    @id @default(autoincrement())
+  value    Int
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@unique([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model Favorite {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@index([userId])
+  @@index([recipeId])
+}
