@@ -23,10 +23,67 @@ export async function PATCH(
   try {
     const existingRecipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
+      include: { steps: true },
     });
 
     if (!existingRecipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+    }
+    function deleteImage(imagePath: string) {
+      const fullPath = path.join(process.cwd(), "public", imagePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    const incomingIds = body.steps.map((s: any) => s.id).filter(Boolean);
+
+    for (const step of existingRecipe.steps) {
+      if (!incomingIds.includes(step.id)) {
+        if (step.image) deleteImage(step.image);
+
+        await prisma.step.delete({
+          where: { id: step.id },
+        });
+      }
+    }
+
+    for (const step of body.steps) {
+      if (step.id) {
+        const existingStep = existingRecipe.steps.find(
+          (s: any) => s.id === step.id,
+        );
+
+        if (step.image === null && existingStep?.image) {
+          deleteImage(existingStep.image);
+        }
+
+        if (
+          step.image &&
+          existingStep?.image &&
+          step.image !== existingStep.image
+        ) {
+          deleteImage(existingStep.image);
+        }
+
+        await prisma.step.update({
+          where: { id: step.id },
+          data: {
+            description: step.description,
+            step_order: step.step_order,
+            image: step.image,
+          },
+        });
+      } else {
+        await prisma.step.create({
+          data: {
+            recipeId,
+            description: step.description,
+            step_order: step.step_order,
+            image: step.image,
+          },
+        });
+      }
     }
     if (
       body.image &&
@@ -58,11 +115,6 @@ export async function PATCH(
         ingredients: {
           deleteMany: {},
           create: body.ingredients,
-        },
-
-        steps: {
-          deleteMany: {},
-          create: body.steps,
         },
       },
     });

@@ -19,6 +19,7 @@ const DataTable = ({ recipes }: Props) => {
       <table border={1}>
         <thead>
           <tr>
+            <th></th>
             <th>Naslov</th>
             <th>Opis</th>
             <th>Kategorija</th>

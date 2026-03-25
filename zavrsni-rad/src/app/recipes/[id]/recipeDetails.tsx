@@ -55,7 +55,21 @@ const RecipeDetails = ({ recipe }: Props) => {
               .sort((a, b) => a.step_order - b.step_order)
               .map((step, index) => (
                 <li key={step.id}>
-                  <strong>{index + 1}. korak:</strong> {step.description}
+                  <strong>{index + 1}. korak:</strong> {step.description}{" "}
+                  {step.image && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <img
+                        src={step.image}
+                        alt={"stepimage"}
+                        style={{
+                          maxWidth: "300px",
+                          width: "100%",
+                          height: "auto",
+                          borderRadius: "8px",
+                        }}
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
           </ol>

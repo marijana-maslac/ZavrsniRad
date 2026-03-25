@@ -31,11 +31,11 @@ const RecipeForm = ({ recipe }: Props) => {
       title: "",
       description: "",
       difficulty: "LAGANO",
-      cooking_time: 0,
+      cooking_time: 1,
       servings: 1,
       category: "RAZNO",
       ingredients: [{ name: "", amount: 0, unit: "G" }],
-      steps: [{ description: "" }],
+      steps: [{ description: "", image: undefined }],
       image: undefined,
       authorId: loggedUserId,
     },
@@ -63,9 +63,11 @@ const RecipeForm = ({ recipe }: Props) => {
       steps:
         recipe.steps?.length > 0
           ? recipe.steps.map((step) => ({
+              id: step.id, // 🔥 DODAJ
               description: step.description,
+              image: undefined,
             }))
-          : [{ description: "" }],
+          : [{ description: "", image: undefined }],
     });
   }, [recipe, form]);
 
@@ -102,10 +104,31 @@ const RecipeForm = ({ recipe }: Props) => {
       }
     }
 
-    const normalizedSteps = values.steps.map((step, index) => ({
-      description: step.description,
-      step_order: index + 1,
-    }));
+    const normalizedSteps = await Promise.all(
+      values.steps.map(async (step, index) => {
+        let oldImage = recipe?.steps[index]?.image || null;
+        let stepImageUrl = oldImage;
+
+        if (step.removeImage) {
+          stepImageUrl = null;
+        }
+
+        if (step.image) {
+          const formData = new FormData();
+          formData.append("image", step.image);
+
+          const res = await axios.post("/api/upload", formData);
+          stepImageUrl = res.data.filePath;
+        }
+
+        return {
+          id: recipe?.steps[index]?.id,
+          description: step.description,
+          step_order: index + 1,
+          image: stepImageUrl,
+        };
+      }),
+    );
 
     const payload = {
       ...values,
@@ -272,26 +295,64 @@ const RecipeForm = ({ recipe }: Props) => {
       </button>
 
       <h3>Koraci izrade recepta</h3>
-      {stepFields.map((item, index) => (
-        <div key={item.id}>
-          <h4>{index + 1}. Korak</h4>
-          <Controller
-            name={`steps.${index}.description`}
-            control={form.control}
-            render={({ field }) => <textarea {...field} />}
-          />
-          <button type="button" onClick={() => removeStep(index)}>
-            Ukloni
-          </button>
-        </div>
-      ))}
-      <button type="button" onClick={() => appendStep({ description: "" })}>
+      {stepFields.map((item, index) => {
+        const removeImage = form.watch(`steps.${index}.removeImage`);
+
+        return (
+          <div key={item.id}>
+            <h4>{index + 1}. Korak</h4>
+
+            <Controller
+              name={`steps.${index}.description`}
+              control={form.control}
+              render={({ field }) => <textarea {...field} />}
+            />
+
+            <Controller
+              name={`steps.${index}.image`}
+              control={form.control}
+              render={({ field }) => (
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    field.onChange(e.target.files?.[0] ?? undefined)
+                  }
+                />
+              )}
+            />
+
+            {recipe?.steps[index]?.image && (
+              <div>
+                <img src={recipe.steps[index].image} width={120} />
+
+                <button
+                  type="button"
+                  disabled={removeImage}
+                  onClick={() => {
+                    form.setValue(`steps.${index}.removeImage`, true);
+                  }}
+                >
+                  {removeImage ? "Obrisano" : "Ukloni sliku"}
+                </button>
+              </div>
+            )}
+
+            <button type="button" onClick={() => removeStep(index)}>
+              Ukloni
+            </button>
+          </div>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => appendStep({ description: "", image: undefined })}
+      >
         Dodaj korak
       </button>
 
       <br />
       <button type="submit" disabled={isSubmitting}>
-        {recipe ? "Update" : "Create"}
+        {recipe ? "Ažuriraj recept" : "Kreiraj novi recept"}
       </button>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
