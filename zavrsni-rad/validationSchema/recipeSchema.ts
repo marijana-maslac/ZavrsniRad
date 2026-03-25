@@ -43,6 +43,8 @@ export const recipeSchema = z.object({
   steps: z.array(
     z.object({
       description: z.string(),
+      image: z.any().optional(),
+      removeImage: z.boolean().optional(),
     }),
   ),
   authorId: z.number(),
