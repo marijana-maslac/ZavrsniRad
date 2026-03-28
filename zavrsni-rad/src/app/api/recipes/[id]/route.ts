@@ -109,13 +109,19 @@ export async function PATCH(
         difficulty: body.difficulty,
         cooking_time: body.cooking_time,
         servings: body.servings,
-        category: body.category,
         authorId: body.authorId,
+
+        categories: {
+          set: (body.categories ?? []).map((id: number) => ({ id })),
+        },
 
         ingredients: {
           deleteMany: {},
           create: body.ingredients,
         },
+      },
+      include: {
+        categories: true,
       },
     });
 
@@ -159,12 +165,6 @@ export async function DELETE(
         console.error("Greška pri brisanju slike:", err);
       }
     }
-    // ako napravim prisma migrate dev onCascade mogu obrisat ovi dio i ostavit samo prisma.recipe.delete do tad tribam sve pojedinacno imenovat!
-    await prisma.ingredient.deleteMany({ where: { recipeId } });
-    await prisma.step.deleteMany({ where: { recipeId } });
-    await prisma.comment.deleteMany({ where: { recipeId } });
-    await prisma.rating.deleteMany({ where: { recipeId } });
-    await prisma.favorite.deleteMany({ where: { recipeId } });
 
     await prisma.recipe.delete({ where: { id: recipeId } });
 

@@ -21,8 +21,12 @@ export async function POST(request: NextRequest) {
       difficulty: body.difficulty,
       cooking_time: body.cooking_time,
       servings: body.servings,
-      category: body.category,
       authorId: Number(body.authorId),
+
+      categories: {
+        connect: (body.categories ?? []).map((id: number) => ({ id })),
+      },
+
       ingredients: {
         create: body.ingredients,
       },
@@ -34,6 +38,7 @@ export async function POST(request: NextRequest) {
     include: {
       ingredients: true,
       steps: true,
+      categories: true,
     },
   });
 

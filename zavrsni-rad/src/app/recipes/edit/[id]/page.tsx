@@ -13,7 +13,7 @@ export default async function EditRecipe({ params }: Props) {
 
   const recipe = await prisma.recipe.findUnique({
     where: { id: recipeId },
-    include: { ingredients: true, steps: true },
+    include: { ingredients: true, steps: true, categories: true },
   });
 
   if (!recipe) return <p>Recipe not found</p>;

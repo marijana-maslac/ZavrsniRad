@@ -17,20 +17,7 @@ export const recipeSchema = z.object({
     .int("Broj porcija mora biti cijeli broj")
     .min(1, "Mora biti barem 1 porcija.")
     .max(50, "Previše porcija."),
-
-  category: z.enum([
-    "DORUČAK",
-    "RUČAK",
-    "VEČERA",
-    "VEGANSKI",
-    "VEGETARIJANSKI",
-    "FINGER_FOOD",
-    "GLUTEN_FREE",
-    "DESERTI",
-    "PIĆA",
-    "JUHE",
-    "RAZNO",
-  ]),
+  categories: z.array(z.number()).min(1, "Odaberi barem jednu kategoriju"),
   ingredients: z.array(
     z.object({
       name: z.string(),

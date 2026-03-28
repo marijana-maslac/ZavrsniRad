@@ -23,6 +23,7 @@ const RecipePage = async ({ params }: Params) => {
       author: true,
       ingredients: true,
       steps: true,
+      categories: true,
     },
   });
 

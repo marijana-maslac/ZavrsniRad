@@ -3,7 +3,7 @@ import DeleteButton from "./deleteButton";
 import Link from "next/link";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
-  include: { author: true; ingredients: true; steps: true };
+  include: { author: true; ingredients: true; steps: true; categories: true };
 }>;
 
 interface Props {
@@ -30,10 +30,16 @@ const RecipeDetails = ({ recipe }: Props) => {
       )}
       <p>{recipe.description}</p>
       <p>Autor: {recipe.author.username}</p>
-      <p>Kategorija: {recipe.category}</p>
+      <div>
+        <p>Kategorije:</p>
+        <ul>
+          {recipe.categories?.map((cat) => (
+            <li key={cat.id}>{cat.name}</li>
+          ))}
+        </ul>
+      </div>{" "}
       <p>Vrijeme kuhanja: {recipe.cooking_time} min</p>
       <p>Težina: {recipe.difficulty}</p>
-
       {recipe.ingredients && (
         <div>
           <h3>Sastojci:</h3>
@@ -46,7 +52,6 @@ const RecipeDetails = ({ recipe }: Props) => {
           </ul>
         </div>
       )}
-
       {recipe.steps && (
         <div>
           <h3>Koraci:</h3>
@@ -75,7 +80,6 @@ const RecipeDetails = ({ recipe }: Props) => {
           </ol>
         </div>
       )}
-
       <Link href="/recipes">
         <button style={{ padding: "5px 10px", marginBottom: "20px" }}>
           Natrag
@@ -86,7 +90,6 @@ const RecipeDetails = ({ recipe }: Props) => {
           Uredi
         </button>
       </Link>
-
       <DeleteButton recipeId={recipe.id} />
     </div>
   );

@@ -22,7 +22,6 @@ const DataTable = ({ recipes }: Props) => {
             <th></th>
             <th>Naslov</th>
             <th>Opis</th>
-            <th>Kategorija</th>
             <th>Vrijeme kuhanja</th>
             <th>Težina</th>
             <th>Detaljno</th>
@@ -47,7 +46,6 @@ const DataTable = ({ recipes }: Props) => {
               </td>
               <td>{recipe.title}</td>
               <td>{recipe.description}</td>
-              <td>{recipe.category}</td>
               <td>{recipe.cooking_time} min</td>
               <td>{recipe.difficulty}</td>
               <th>
