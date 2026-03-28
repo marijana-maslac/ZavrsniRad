@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Prisma } from "@/generated/prisma/client";
+import { Category, Prisma } from "@/generated/prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { recipeSchema } from "../../validationSchema/recipeSchema";
@@ -11,7 +11,7 @@ import z from "zod";
 const loggedUserId = 1;
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
-  include: { ingredients: true; steps: true };
+  include: { ingredients: true; steps: true; categories: true };
 }>;
 
 type RecipeFormData = z.infer<typeof recipeSchema>;
@@ -33,25 +33,33 @@ const RecipeForm = ({ recipe }: Props) => {
       difficulty: "LAGANO",
       cooking_time: 1,
       servings: 1,
-      category: "RAZNO",
+      categories: [],
       ingredients: [{ name: "", amount: 0, unit: "G" }],
-      steps: [{ description: "", image: undefined }],
+      steps: [{ description: "", image: undefined, removeImage: false }],
       image: undefined,
       authorId: loggedUserId,
     },
   });
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    if (!recipe) return;
+    axios.get("/api/categories").then((res) => {
+      setCategories(res.data);
+    });
+  }, []);
+  useEffect(() => {
+    if (!recipe || categories.length === 0) return;
+
     form.reset({
       title: recipe.title,
       description: recipe.description,
       difficulty: recipe.difficulty,
       cooking_time: recipe.cooking_time ?? 0,
       servings: recipe.servings ?? 1,
-      category: recipe.category,
+      categories: recipe.categories?.map((c) => c.id) || [],
       image: undefined,
       authorId: recipe.authorId,
+
       ingredients:
         recipe.ingredients?.length > 0
           ? recipe.ingredients.map((ing) => ({
@@ -60,22 +68,24 @@ const RecipeForm = ({ recipe }: Props) => {
               unit: ing.unit ?? "G",
             }))
           : [{ name: "", amount: 0, unit: "G" }],
+
       steps:
         recipe.steps?.length > 0
           ? recipe.steps.map((step) => ({
-              id: step.id, // 🔥 DODAJ
+              id: step.id,
               description: step.description,
               image: undefined,
             }))
-          : [{ description: "", image: undefined }],
+          : [{ description: "", image: undefined, removeImage: false }],
     });
-  }, [recipe, form]);
+  }, [recipe, categories, form]);
 
   const {
     fields: ingredientFields,
     append: appendIngredient,
     remove: removeIngredient,
   } = useFieldArray({ name: "ingredients", control: form.control });
+
   const {
     fields: stepFields,
     append: appendStep,
@@ -135,16 +145,16 @@ const RecipeForm = ({ recipe }: Props) => {
       image: imageUrl,
       steps: normalizedSteps,
     };
+
     try {
       if (recipe) {
         await axios.patch(`/api/recipes/${recipe.id}`, payload);
         router.push(`/recipes/${recipe.id}`);
-        router.refresh();
       } else {
         await axios.post("/api/recipes", payload);
         router.push(`/recipes`);
-        router.refresh();
       }
+      router.refresh();
     } catch {
       setError("Greška pri spremanju recepta");
     } finally {
@@ -207,24 +217,33 @@ const RecipeForm = ({ recipe }: Props) => {
         )}
       />
 
-      <label>Kategorija:</label>
+      <label>Kategorije:</label>
       <Controller
-        name="category"
+        name="categories"
         control={form.control}
         render={({ field }) => (
-          <select {...field}>
-            <option value="RAZNO">Razno</option>
-            <option value="DORUČAK">Doručak</option>
-            <option value="RUČAK">Ručak</option>
-            <option value="VEČERA">Večera</option>
-            <option value="VEGANSKI">Veganski</option>
-            <option value="VEGETARIJANSKI">Vegetarijanski</option>
-            <option value="FINGER_FOOD">Finger food</option>
-            <option value="GLUTEN_FREE">Bez glutena</option>
-            <option value="DESERTI">Deserti</option>
-            <option value="PIĆA">Pića</option>
-            <option value="JUHE">Juhe</option>
-          </select>
+          <div>
+            {categories.map((cat) => (
+              <label key={cat.id} style={{ display: "block" }}>
+                <input
+                  type="checkbox"
+                  checked={(field.value ?? []).includes(cat.id)}
+                  onChange={(e) => {
+                    const current = field.value ?? [];
+
+                    if (e.target.checked) {
+                      field.onChange([...current, Number(cat.id)]);
+                    } else {
+                      field.onChange(
+                        current.filter((id: number) => id !== cat.id),
+                      );
+                    }
+                  }}
+                />
+                {cat.name}
+              </label>
+            ))}
+          </div>
         )}
       />
 
@@ -235,6 +254,7 @@ const RecipeForm = ({ recipe }: Props) => {
           <img src={recipe.image} alt="recipe" width={150} />
         </div>
       )}
+
       <Controller
         name="image"
         control={form.control}
@@ -249,7 +269,6 @@ const RecipeForm = ({ recipe }: Props) => {
       <h3>Sastojci</h3>
       {ingredientFields.map((item, index) => (
         <div key={item.id}>
-          <h4>{index + 1}.sastojak</h4>
           <Controller
             name={`ingredients.${index}.name`}
             control={form.control}
@@ -287,6 +306,7 @@ const RecipeForm = ({ recipe }: Props) => {
           </button>
         </div>
       ))}
+
       <button
         type="button"
         onClick={() => appendIngredient({ name: "", amount: 0, unit: "G" })}
@@ -329,7 +349,7 @@ const RecipeForm = ({ recipe }: Props) => {
                   type="button"
                   disabled={removeImage}
                   onClick={() => {
-                    form.setValue(`steps.${index}.removeImage`, true);
+                    form.setValue(`steps.${index}.removeImage`, !removeImage);
                   }}
                 >
                   {removeImage ? "Obrisano" : "Ukloni sliku"}
@@ -351,9 +371,11 @@ const RecipeForm = ({ recipe }: Props) => {
       </button>
 
       <br />
+
       <button type="submit" disabled={isSubmitting}>
-        {recipe ? "Ažuriraj recept" : "Kreiraj novi recept"}
+        {recipe ? "Ažuriraj recept" : "Kreiraj recept"}
       </button>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
   );

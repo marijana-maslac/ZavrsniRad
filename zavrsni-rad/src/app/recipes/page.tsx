@@ -8,6 +8,7 @@ const Recipes = async () => {
       author: true,
       ingredients: true,
       steps: true,
+      categories: true,
     },
   });
 

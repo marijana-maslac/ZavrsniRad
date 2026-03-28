@@ -38,7 +38,7 @@ model Recipe {
   servings     Int
   authorId     Int
   author       User         @relation(fields: [authorId], references: [id])
-  category     Category
+  categories   Category[]
   ingredients  Ingredient[]
   steps        Step[]
   comments     Comment[]
@@ -46,7 +46,6 @@ model Recipe {
   favorites    Favorite[]
 
   @@index([authorId])
-  @@index([category])
   @@index([difficulty])
 }
 
@@ -56,24 +55,29 @@ enum Difficulty {
   TEŠKO
 }
 
-enum Category {
-  DORUČAK
-  RUČAK
-  VEČERA
-  VEGANSKI
-  VEGETARIJANSKI
-  FINGER_FOOD
-  GLUTEN_FREE
-  DESERTI
-  PIĆA
-  JUHE
-  RAZNO
+// enum Category {
+//   DORUČAK
+//   RUČAK
+//   VEČERA
+//   VEGANSKI
+//   VEGETARIJANSKI
+//   FINGER_FOOD
+//   GLUTEN_FREE
+//   DESERTI
+//   PIĆA
+//   JUHE
+//   RAZNO
+// }
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  recipes Recipe[]
 }
 
 model Ingredient {
   id       Int    @id @default(autoincrement())
   recipeId Int
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   name     String
   amount   Float?
   unit     Unit?
@@ -96,7 +100,7 @@ enum Unit {
 model Step {
   id          Int     @id @default(autoincrement())
   recipeId    Int
-  recipe      Recipe  @relation(fields: [recipeId], references: [id])
+  recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   step_order  Int
   description String
   image       String?
@@ -110,9 +114,9 @@ model Comment {
   content   String   @db.VarChar(1000)
   image     String?
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipeId  Int
-  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@index([recipeId])
@@ -123,9 +127,9 @@ model Rating {
   id       Int    @id @default(autoincrement())
   value    Int
   userId   Int
-  user     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipeId Int
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
   @@index([userId])
@@ -135,10 +139,11 @@ model Rating {
 model Favorite {
   id       Int    @id @default(autoincrement())
   userId   Int
-  user     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipeId Int
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, recipeId])
   @@index([userId])
   @@index([recipeId])
 }
