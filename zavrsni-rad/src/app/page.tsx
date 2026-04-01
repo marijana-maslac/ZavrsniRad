@@ -6,14 +6,14 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
+        {/* <Image
           className={styles.logo}
           src="/next.svg"
           alt="Logo"
           width={100}
           height={20}
           priority
-        />
+        /> */}
 
         <div className={styles.intro}>
           <h1>Dobrodošli u Recipe App</h1>
