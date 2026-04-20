@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recipeSchema } from "../../../../validationSchema/recipeSchema";
 import prisma from "../../../../prisma/db";
+import options from "../auth/[...nextauth]/options";
+import { getServerSession } from "next-auth";
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(options);
+
+  if (!session) {
+    return NextResponse.json(
+      { error: "Korisnik nije prijavljen" },
+      { status: 401 },
+    );
+  }
   const body = await request.json();
   const validation = recipeSchema.safeParse(body);
 
@@ -21,8 +31,7 @@ export async function POST(request: NextRequest) {
       difficulty: body.difficulty,
       cooking_time: body.cooking_time,
       servings: body.servings,
-      authorId: Number(body.authorId),
-
+      authorId: Number(session?.user.id),
       categories: {
         connect: (body.categories ?? []).map((id: number) => ({ id })),
       },

@@ -10,7 +10,7 @@ const MainNav = async () => {
       {session ? (
         <Link href={"/api/auth/signout?callbackUrl=/"}>Odjavi se </Link>
       ) : (
-        <Link href={"/api/auth/signin"}>Prijavi se </Link>
+        <Link href={"/auth/signin"}>Prijavi se </Link>
       )}
       <Link href={"/"}>Početna </Link>
       <Link href={"/recipes"}>Recepti </Link>

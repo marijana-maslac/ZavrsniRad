@@ -7,9 +7,9 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { userSchema } from "../../validationSchema/userSchema";
 
-type UserFormData = z.infer<typeof userSchema>;
+type RegisterFormData = z.infer<typeof userSchema>;
 
-const UserForm = () => {
+const RegisterForm = () => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ const UserForm = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<UserFormData>({
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       name: "",
@@ -28,7 +28,7 @@ const UserForm = () => {
     },
   });
 
-  const onSubmit = async (data: UserFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
     setServerError(null);
     try {
@@ -112,4 +112,4 @@ const UserForm = () => {
   );
 };
 
-export default UserForm;
+export default RegisterForm;
