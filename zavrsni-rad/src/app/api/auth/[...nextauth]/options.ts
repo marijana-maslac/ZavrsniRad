@@ -4,6 +4,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
 const options: NextAuthOptions = {
+  pages: {
+    signIn: "/auth/signin",
+  },
   providers: [
     CredentialsProvider({
       id: "password",

@@ -7,8 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { recipeSchema } from "../../validationSchema/recipeSchema";
 import z from "zod";
-
-const loggedUserId = 1;
+import { useSession } from "next-auth/react";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
   include: { ingredients: true; steps: true; categories: true };
@@ -24,6 +23,7 @@ const RecipeForm = ({ recipe }: Props) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { data: session } = useSession();
 
   const form = useForm<RecipeFormData>({
     resolver: zodResolver(recipeSchema),
@@ -37,16 +37,20 @@ const RecipeForm = ({ recipe }: Props) => {
       ingredients: [{ name: "", amount: 0, unit: "G" }],
       steps: [{ description: "", image: undefined, removeImage: false }],
       image: undefined,
-      authorId: loggedUserId,
     },
   });
   const [categories, setCategories] = useState<Category[]>([]);
-
+  useEffect(() => {
+    if (session?.user?.id) {
+      form.setValue("authorId", Number(session.user.id));
+    }
+  }, [session, form]);
   useEffect(() => {
     axios.get("/api/categories").then((res) => {
       setCategories(res.data);
     });
   }, []);
+
   useEffect(() => {
     if (!recipe || categories.length === 0) return;
 
@@ -98,7 +102,6 @@ const RecipeForm = ({ recipe }: Props) => {
   const onSubmit = async (values: RecipeFormData) => {
     setIsSubmitting(true);
     setError("");
-
     let imageUrl = recipe?.image || "";
 
     if (values.image) {
@@ -155,229 +158,249 @@ const RecipeForm = ({ recipe }: Props) => {
         router.push(`/recipes`);
       }
       router.refresh();
-    } catch {
-      setError("Greška pri spremanju recepta");
+    } catch (error: any) {
+      console.error("Submission error: ", error);
+      setError(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Greška pri spremanju recepta",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  if (!session) {
+    return (
+      <div>
+        Morate biti prijavljeni za kreiranje recepta.{" "}
+        <button
+          onClick={() =>
+            router.push(`/api/auth/signin?callbackUrl=/recipes/new`)
+          }
+        >
+          Prijavi se
+        </button>
+      </div>
+    );
+  }
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <label>Naslov:</label>
-      <Controller
-        name="title"
-        control={form.control}
-        render={({ field }) => <input {...field} />}
-      />
+    <div>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <label>Naslov:</label>
+        <Controller
+          name="title"
+          control={form.control}
+          render={({ field }) => <input {...field} />}
+        />
 
-      <label>Opis:</label>
-      <Controller
-        name="description"
-        control={form.control}
-        render={({ field }) => <textarea {...field} />}
-      />
+        <label>Opis:</label>
+        <Controller
+          name="description"
+          control={form.control}
+          render={({ field }) => <textarea {...field} />}
+        />
 
-      <label>Težina:</label>
-      <Controller
-        name="difficulty"
-        control={form.control}
-        render={({ field }) => (
-          <select {...field}>
-            <option value="LAGANO">Lagano</option>
-            <option value="SREDNJE">Srednje</option>
-            <option value="TEŠKO">Teško</option>
-          </select>
-        )}
-      />
+        <label>Težina:</label>
+        <Controller
+          name="difficulty"
+          control={form.control}
+          render={({ field }) => (
+            <select {...field}>
+              <option value="LAGANO">Lagano</option>
+              <option value="SREDNJE">Srednje</option>
+              <option value="TEŠKO">Teško</option>
+            </select>
+          )}
+        />
 
-      <label>Vrijeme kuhanja (min):</label>
-      <Controller
-        name="cooking_time"
-        control={form.control}
-        render={({ field }) => (
-          <input
-            type="number"
-            {...field}
-            onChange={(e) => field.onChange(Number(e.target.value))}
-          />
-        )}
-      />
+        <label>Vrijeme kuhanja (min):</label>
+        <Controller
+          name="cooking_time"
+          control={form.control}
+          render={({ field }) => (
+            <input
+              type="number"
+              {...field}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            />
+          )}
+        />
 
-      <label>Porcije:</label>
-      <Controller
-        name="servings"
-        control={form.control}
-        render={({ field }) => (
-          <input
-            type="number"
-            {...field}
-            onChange={(e) => field.onChange(Number(e.target.value))}
-          />
-        )}
-      />
+        <label>Porcije:</label>
+        <Controller
+          name="servings"
+          control={form.control}
+          render={({ field }) => (
+            <input
+              type="number"
+              {...field}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            />
+          )}
+        />
 
-      <label>Kategorije:</label>
-      <Controller
-        name="categories"
-        control={form.control}
-        render={({ field }) => (
+        <label>Kategorije:</label>
+        <Controller
+          name="categories"
+          control={form.control}
+          render={({ field }) => (
+            <div>
+              {categories.map((cat) => (
+                <label key={cat.id} style={{ display: "block" }}>
+                  <input
+                    type="checkbox"
+                    checked={(field.value ?? []).includes(cat.id)}
+                    onChange={(e) => {
+                      const current = field.value ?? [];
+
+                      if (e.target.checked) {
+                        field.onChange([...current, Number(cat.id)]);
+                      } else {
+                        field.onChange(
+                          current.filter((id: number) => id !== cat.id),
+                        );
+                      }
+                    }}
+                  />
+                  {cat.name}
+                </label>
+              ))}
+            </div>
+          )}
+        />
+
+        <label>Slika:</label>
+        {recipe?.image && (
           <div>
-            {categories.map((cat) => (
-              <label key={cat.id} style={{ display: "block" }}>
-                <input
-                  type="checkbox"
-                  checked={(field.value ?? []).includes(cat.id)}
-                  onChange={(e) => {
-                    const current = field.value ?? [];
-
-                    if (e.target.checked) {
-                      field.onChange([...current, Number(cat.id)]);
-                    } else {
-                      field.onChange(
-                        current.filter((id: number) => id !== cat.id),
-                      );
-                    }
-                  }}
-                />
-                {cat.name}
-              </label>
-            ))}
+            <p>Trenutna slika:</p>
+            <img src={recipe.image} alt="recipe" width={150} />
           </div>
         )}
-      />
 
-      <label>Slika:</label>
-      {recipe?.image && (
-        <div>
-          <p>Trenutna slika:</p>
-          <img src={recipe.image} alt="recipe" width={150} />
-        </div>
-      )}
-
-      <Controller
-        name="image"
-        control={form.control}
-        render={({ field }) => (
-          <input
-            type="file"
-            onChange={(e) => field.onChange(e.target.files?.[0] ?? undefined)}
-          />
-        )}
-      />
-
-      <h3>Sastojci</h3>
-      {ingredientFields.map((item, index) => (
-        <div key={item.id}>
-          <Controller
-            name={`ingredients.${index}.name`}
-            control={form.control}
-            render={({ field }) => <input placeholder="Ime" {...field} />}
-          />
-          <Controller
-            name={`ingredients.${index}.amount`}
-            control={form.control}
-            render={({ field }) => (
-              <input
-                type="number"
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
-            )}
-          />
-          <Controller
-            name={`ingredients.${index}.unit`}
-            control={form.control}
-            render={({ field }) => (
-              <select {...field}>
-                <option value="G">G</option>
-                <option value="KG">KG</option>
-                <option value="ML">ML</option>
-                <option value="DL">DL</option>
-                <option value="L">L</option>
-                <option value="KOM">KOM</option>
-                <option value="TBSP">TBSP</option>
-                <option value="TSP">TSP</option>
-              </select>
-            )}
-          />
-          <button type="button" onClick={() => removeIngredient(index)}>
-            Ukloni
-          </button>
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={() => appendIngredient({ name: "", amount: 0, unit: "G" })}
-      >
-        Dodaj sastojak
-      </button>
-
-      <h3>Koraci izrade recepta</h3>
-      {stepFields.map((item, index) => {
-        const removeImage = form.watch(`steps.${index}.removeImage`);
-
-        return (
-          <div key={item.id}>
-            <h4>{index + 1}. Korak</h4>
-
-            <Controller
-              name={`steps.${index}.description`}
-              control={form.control}
-              render={({ field }) => <textarea {...field} />}
+        <Controller
+          name="image"
+          control={form.control}
+          render={({ field }) => (
+            <input
+              type="file"
+              onChange={(e) => field.onChange(e.target.files?.[0] ?? undefined)}
             />
+          )}
+        />
 
+        <h3>Sastojci</h3>
+        {ingredientFields.map((item, index) => (
+          <div key={item.id}>
             <Controller
-              name={`steps.${index}.image`}
+              name={`ingredients.${index}.name`}
+              control={form.control}
+              render={({ field }) => <input placeholder="Ime" {...field} />}
+            />
+            <Controller
+              name={`ingredients.${index}.amount`}
               control={form.control}
               render={({ field }) => (
                 <input
-                  type="file"
-                  onChange={(e) =>
-                    field.onChange(e.target.files?.[0] ?? undefined)
-                  }
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               )}
             />
-
-            {recipe?.steps[index]?.image && (
-              <div>
-                <img src={recipe.steps[index].image} width={120} />
-
-                <button
-                  type="button"
-                  disabled={removeImage}
-                  onClick={() => {
-                    form.setValue(`steps.${index}.removeImage`, !removeImage);
-                  }}
-                >
-                  {removeImage ? "Obrisano" : "Ukloni sliku"}
-                </button>
-              </div>
-            )}
-
-            <button type="button" onClick={() => removeStep(index)}>
+            <Controller
+              name={`ingredients.${index}.unit`}
+              control={form.control}
+              render={({ field }) => (
+                <select {...field}>
+                  <option value="G">G</option>
+                  <option value="KG">KG</option>
+                  <option value="ML">ML</option>
+                  <option value="DL">DL</option>
+                  <option value="L">L</option>
+                  <option value="KOM">KOM</option>
+                  <option value="TBSP">TBSP</option>
+                  <option value="TSP">TSP</option>
+                </select>
+              )}
+            />
+            <button type="button" onClick={() => removeIngredient(index)}>
               Ukloni
             </button>
           </div>
-        );
-      })}
-      <button
-        type="button"
-        onClick={() => appendStep({ description: "", image: undefined })}
-      >
-        Dodaj korak
-      </button>
+        ))}
 
-      <br />
+        <button
+          type="button"
+          onClick={() => appendIngredient({ name: "", amount: 0, unit: "G" })}
+        >
+          Dodaj sastojak
+        </button>
 
-      <button type="submit" disabled={isSubmitting}>
-        {recipe ? "Ažuriraj recept" : "Kreiraj recept"}
-      </button>
+        <h3>Koraci izrade recepta</h3>
+        {stepFields.map((item, index) => {
+          const removeImage = form.watch(`steps.${index}.removeImage`);
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
+          return (
+            <div key={item.id}>
+              <h4>{index + 1}. Korak</h4>
+
+              <Controller
+                name={`steps.${index}.description`}
+                control={form.control}
+                render={({ field }) => <textarea {...field} />}
+              />
+
+              <Controller
+                name={`steps.${index}.image`}
+                control={form.control}
+                render={({ field }) => (
+                  <input
+                    type="file"
+                    onChange={(e) =>
+                      field.onChange(e.target.files?.[0] ?? undefined)
+                    }
+                  />
+                )}
+              />
+
+              {recipe?.steps[index]?.image && (
+                <div>
+                  <img src={recipe.steps[index].image} width={120} />
+
+                  <button
+                    type="button"
+                    disabled={removeImage}
+                    onClick={() => {
+                      form.setValue(`steps.${index}.removeImage`, !removeImage);
+                    }}
+                  >
+                    {removeImage ? "Obrisano" : "Ukloni sliku"}
+                  </button>
+                </div>
+              )}
+
+              <button type="button" onClick={() => removeStep(index)}>
+                Ukloni
+              </button>
+            </div>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => appendStep({ description: "", image: undefined })}
+        >
+          Dodaj korak
+        </button>
+
+        <br />
+
+        <button type="submit" disabled={isSubmitting}>
+          {recipe ? "Ažuriraj recept" : "Kreiraj recept"}
+        </button>
+
+        {error && <div style={{ color: "red" }}>{error}</div>}
+      </form>
+    </div>
   );
 };
 
