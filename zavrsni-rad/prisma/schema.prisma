@@ -55,19 +55,6 @@ enum Difficulty {
   TEŠKO
 }
 
-// enum Category {
-//   DORUČAK
-//   RUČAK
-//   VEČERA
-//   VEGANSKI
-//   VEGETARIJANSKI
-//   FINGER_FOOD
-//   GLUTEN_FREE
-//   DESERTI
-//   PIĆA
-//   JUHE
-//   RAZNO
-// }
 model Category {
   id      Int      @id @default(autoincrement())
   name    String   @unique

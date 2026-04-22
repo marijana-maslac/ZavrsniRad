@@ -3,6 +3,7 @@ import DeleteButton from "./deleteButton";
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import BackButton from "./backButton";
+import Rating from "@/components/Rating";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
   include: {
@@ -55,6 +56,7 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
         initialIsFavorite={initialIsFavorite}
       />
       <p>❤️ {recipe._count?.favorites ?? 0} osoba je spremila ovaj recept</p>{" "}
+      <Rating recipeId={recipe.id} />
       <div>
         <p>Kategorije:</p>
         <ul>
@@ -65,6 +67,7 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
       </div>{" "}
       <p>Vrijeme kuhanja: {recipe.cooking_time} min</p>
       <p>Težina: {recipe.difficulty}</p>
+      <p>Broj porcija: {recipe.servings}</p>
       {recipe.ingredients && (
         <div>
           <h3>Sastojci:</h3>
