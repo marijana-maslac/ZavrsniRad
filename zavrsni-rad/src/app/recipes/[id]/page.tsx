@@ -1,5 +1,7 @@
+import { getServerSession } from "next-auth";
 import prisma from "../../../../prisma/db";
 import RecipeDetails from "./recipeDetails";
+import options from "@/app/api/auth/[...nextauth]/options";
 
 interface Params {
   params: Promise<{ id?: string }>;
@@ -16,7 +18,20 @@ const RecipePage = async ({ params }: Params) => {
   if (isNaN(recipeId)) {
     return <p>Nevažeći ID recepta.</p>;
   }
+  const session = await getServerSession(options);
 
+  let isFavorite = false;
+
+  if (session) {
+    const fav = await prisma.favorite.findFirst({
+      where: {
+        userId: Number(session.user.id),
+        recipeId: recipeId,
+      },
+    });
+
+    isFavorite = !!fav;
+  }
   const recipe = await prisma.recipe.findUnique({
     where: { id: recipeId },
     include: {
@@ -24,6 +39,11 @@ const RecipePage = async ({ params }: Params) => {
       ingredients: true,
       steps: true,
       categories: true,
+      _count: {
+        select: {
+          favorites: true,
+        },
+      },
     },
   });
 
@@ -31,7 +51,13 @@ const RecipePage = async ({ params }: Params) => {
     return <p>Recept nije pronađen.</p>;
   }
 
-  return <RecipeDetails recipe={recipe} />;
+  return (
+    <RecipeDetails
+      recipe={recipe}
+      initialIsFavorite={isFavorite}
+      session={session}
+    />
+  );
 };
 
 export default RecipePage;

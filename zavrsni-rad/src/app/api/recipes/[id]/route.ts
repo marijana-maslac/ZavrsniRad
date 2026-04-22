@@ -2,24 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../prisma/db";
 import path from "path";
 import fs from "fs";
+import { getServerSession } from "next-auth";
+import options from "../../auth/[...nextauth]/options";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id?: string }> },
 ) {
   const { id } = await params;
-
   if (!id) {
     return NextResponse.json({ error: "ID missing" }, { status: 400 });
   }
 
+  const session = await getServerSession(options);
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const recipeId = parseInt(id);
+
   if (isNaN(recipeId)) {
     return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
   }
 
   const body = await req.json();
-
   try {
     const existingRecipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
@@ -29,6 +36,14 @@ export async function PATCH(
     if (!existingRecipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     }
+
+    if (
+      session.user.role !== "ADMIN" &&
+      Number(session.user.id) !== existingRecipe.authorId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     function deleteImage(imagePath: string) {
       const fullPath = path.join(process.cwd(), "public", imagePath);
       if (fs.existsSync(fullPath)) {
@@ -109,8 +124,6 @@ export async function PATCH(
         difficulty: body.difficulty,
         cooking_time: body.cooking_time,
         servings: body.servings,
-        authorId: body.authorId,
-
         categories: {
           set: (body.categories ?? []).map((id: number) => ({ id })),
         },
@@ -145,6 +158,11 @@ export async function DELETE(
   if (isNaN(recipeId)) {
     return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
   }
+  const session = await getServerSession(options);
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const existingRecipe = await prisma.recipe.findUnique({
@@ -153,6 +171,13 @@ export async function DELETE(
 
     if (!existingRecipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+    }
+
+    if (
+      session.user.role !== "ADMIN" &&
+      Number(session.user.id) !== existingRecipe.authorId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     if (existingRecipe.image) {

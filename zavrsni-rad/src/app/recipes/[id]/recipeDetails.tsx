@@ -1,16 +1,36 @@
 import { Prisma } from "@/generated/prisma/client";
 import DeleteButton from "./deleteButton";
 import Link from "next/link";
+import FavoriteButton from "@/components/FavoriteButton";
+import BackButton from "./backButton";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
-  include: { author: true; ingredients: true; steps: true; categories: true };
+  include: {
+    author: true;
+    ingredients: true;
+    steps: true;
+    categories: true;
+    _count: {
+      select: {
+        favorites: true;
+      };
+    };
+  };
 }>;
 
 interface Props {
   recipe: RecipeWithRelations;
+  initialIsFavorite: boolean;
+  session: any;
 }
 
-const RecipeDetails = ({ recipe }: Props) => {
+const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
+  const isOwner = session?.user?.id === recipe.author.id;
+
+  const isAdmin = session?.user?.role === "ADMIN";
+
+  const canEdit = isOwner || isAdmin;
+
   return (
     <div>
       <h1>{recipe.title}</h1>
@@ -30,6 +50,11 @@ const RecipeDetails = ({ recipe }: Props) => {
       )}
       <p>{recipe.description}</p>
       <p>Autor: {recipe.author.username}</p>
+      <FavoriteButton
+        recipeId={recipe.id}
+        initialIsFavorite={initialIsFavorite}
+      />
+      <p>❤️ {recipe._count?.favorites ?? 0} osoba je spremila ovaj recept</p>{" "}
       <div>
         <p>Kategorije:</p>
         <ul>
@@ -80,17 +105,15 @@ const RecipeDetails = ({ recipe }: Props) => {
           </ol>
         </div>
       )}
-      <Link href="/recipes">
-        <button style={{ padding: "5px 10px", marginBottom: "20px" }}>
-          Natrag
-        </button>
-      </Link>
-      <Link href={`/recipes/edit/${recipe.id}`}>
-        <button style={{ padding: "5px 10px", marginBottom: "20px" }}>
-          Uredi
-        </button>
-      </Link>
-      <DeleteButton recipeId={recipe.id} />
+      <BackButton />
+      {canEdit && (
+        <Link href={`/recipes/edit/${recipe.id}`}>
+          <button style={{ padding: "5px 10px", marginBottom: "20px" }}>
+            Uredi
+          </button>
+        </Link>
+      )}
+      {canEdit && <DeleteButton recipeId={recipe.id} />}
     </div>
   );
 };

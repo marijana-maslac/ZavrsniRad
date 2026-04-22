@@ -25,7 +25,6 @@ const DataTable = ({ recipes }: Props) => {
             <th>Vrijeme kuhanja</th>
             <th>Težina</th>
             <th>Detaljno</th>
-            <th>Obriši</th>
             <th>autor</th>
           </tr>
         </thead>
@@ -52,9 +51,6 @@ const DataTable = ({ recipes }: Props) => {
               <th>
                 <Link href={"/recipes/" + recipe.id}>Detaljno</Link>
               </th>
-              <td>
-                <DeleteButton recipeId={recipe.id} />
-              </td>
               <td>{recipe.author.name}</td>
             </tr>
           ))}
