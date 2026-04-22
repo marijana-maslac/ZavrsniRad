@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "../../../../../prisma/db";
+import path from "path";
+import fs from "fs";
+import { getServerSession } from "next-auth";
+import options from "../../auth/[...nextauth]/options";
 
 export async function PATCH(
   req: NextRequest,
@@ -16,7 +20,10 @@ export async function PATCH(
   if (isNaN(userId)) {
     return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
   }
-
+  const session = await getServerSession(options);
+  if (!session || Number(session.user.id) !== userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const body = await req.json();
 
   try {
@@ -70,6 +77,53 @@ export async function PATCH(
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
     console.error(error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id?: string }> },
+) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "ID missing" }, { status: 400 });
+  }
+
+  const userId = parseInt(id);
+  if (isNaN(userId)) {
+    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+  }
+
+  const session = await getServerSession(options);
+
+  if (!session || Number(session.user.id) !== userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const recipes = await prisma.recipe.findMany({
+      where: { authorId: userId },
+    });
+
+    for (const recipe of recipes) {
+      if (recipe.image) {
+        const filePath = path.join(process.cwd(), "public", recipe.image);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
+    await prisma.recipe.deleteMany({
+      where: { authorId: userId },
+    });
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return NextResponse.json({ message: "User deleted" });
+  } catch (error) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

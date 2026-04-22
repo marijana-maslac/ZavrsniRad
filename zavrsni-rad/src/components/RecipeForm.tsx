@@ -169,20 +169,7 @@ const RecipeForm = ({ recipe }: Props) => {
       setIsSubmitting(false);
     }
   };
-  if (!session) {
-    return (
-      <div>
-        Morate biti prijavljeni za kreiranje recepta.{" "}
-        <button
-          onClick={() =>
-            router.push(`/api/auth/signin?callbackUrl=/recipes/new`)
-          }
-        >
-          Prijavi se
-        </button>
-      </div>
-    );
-  }
+
   return (
     <div>
       <form onSubmit={form.handleSubmit(onSubmit)}>

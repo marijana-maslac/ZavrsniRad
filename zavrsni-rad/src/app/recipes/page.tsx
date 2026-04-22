@@ -1,6 +1,8 @@
 import Link from "next/link";
 import prisma from "../../../prisma/db";
 import DataTable from "./DataTable";
+import { getServerSession } from "next-auth";
+import options from "../api/auth/[...nextauth]/options";
 
 const Recipes = async () => {
   const recipes = await prisma.recipe.findMany({
@@ -11,11 +13,12 @@ const Recipes = async () => {
       categories: true,
     },
   });
+  const session = await getServerSession(options);
 
   return (
     <div>
       <br></br>
-      <Link href={"/recipes/new"}>Dodaj novi recept</Link>
+      {session && <Link href={"/recipes/new"}>Dodaj novi recept</Link>}
       <DataTable recipes={recipes} />
     </div>
   );

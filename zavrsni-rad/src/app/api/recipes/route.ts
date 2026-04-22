@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
       { status: 401 },
     );
   }
+
   const body = await request.json();
   const validation = recipeSchema.safeParse(body);
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
       difficulty: body.difficulty,
       cooking_time: body.cooking_time,
       servings: body.servings,
-      authorId: Number(session?.user.id),
+      authorId: Number(session.user.id),
       categories: {
         connect: (body.categories ?? []).map((id: number) => ({ id })),
       },
