@@ -14,6 +14,9 @@ const MainNav = async () => {
       )}
       <Link href={"/"}>Početna </Link>
       <Link href={"/recipes"}>Recepti </Link>
+      {session && session.user.role == "ADMIN" && (
+        <Link href="/categories">Kategorije (admin)</Link>
+      )}
       {session && (
         <>
           <Link href="/favorites">❤️ Omiljeni recepti</Link>

@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
-const CategoriesForm = () => {
+type Category = {
+  id: number;
+  name: string;
+};
+
+const CategoriesAdmin = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const fetchCategories = async () => {
+    const res = await axios.get("/api/categories");
+    setCategories(res.data);
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -20,30 +35,61 @@ const CategoriesForm = () => {
 
     try {
       await axios.post("/api/categories", { name });
-      setSuccess("Kategorija uspješno kreirana");
       setName("");
+      setSuccess("Kategorija kreirana");
+      fetchCategories();
     } catch {
-      setError("Greška pri kreiranju kategorije");
+      setError("Greška pri kreiranju");
+    }
+  };
+
+  // DELETE
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`/api/categories/${id}`);
+      fetchCategories();
+    } catch {
+      setError("Greška pri brisanju");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Kreiraj kategoriju</h2>
+    <div>
+      <h2>Admin kategorije</h2>
 
-      <input
-        type="text"
-        placeholder="Ime kategorije"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-
-      <button type="submit">Spremi</button>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Nova kategorija"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button type="submit">Dodaj</button>
+      </form>
 
       {success && <p style={{ color: "green" }}>{success}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
+
+      <h3>Postojeće kategorije</h3>
+
+      {categories.map((cat) => (
+        <div key={cat.id} style={{ display: "flex", gap: "10px" }}>
+          <span>{cat.name}</span>
+          <button
+            onClick={() => {
+              if (
+                confirm("Jesi li siguran da želiš obrisati ovu kategoriju?")
+              ) {
+                handleDelete(cat.id);
+              }
+            }}
+          >
+            Obriši
+          </button>{" "}
+        </div>
+      ))}
+    </div>
   );
 };
 
-export default CategoriesForm;
+export default CategoriesAdmin;
