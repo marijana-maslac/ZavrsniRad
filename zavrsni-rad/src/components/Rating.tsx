@@ -39,13 +39,19 @@ export default function Rating({ recipeId }: Props) {
   const submitRating = async (v: number) => {
     if (!session) return;
 
+    const previous = value;
+
     setValue(v);
 
-    await axios.post(`/api/recipes/${recipeId}/rating`, {
-      value: v,
-    });
+    try {
+      await axios.post(`/api/recipes/${recipeId}/rating`, {
+        value: v,
+      });
 
-    fetchAverage();
+      fetchAverage();
+    } catch {
+      setValue(previous);
+    }
   };
 
   return (

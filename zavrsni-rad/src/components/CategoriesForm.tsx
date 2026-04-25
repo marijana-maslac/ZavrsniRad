@@ -11,6 +11,8 @@ type Category = {
 const CategoriesAdmin = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -43,7 +45,32 @@ const CategoriesAdmin = () => {
     }
   };
 
-  // DELETE
+  const startEdit = (cat: Category) => {
+    setEditingId(cat.id);
+    setEditValue(cat.name);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditValue("");
+  };
+
+  const saveEdit = async (id: number) => {
+    if (!editValue.trim()) return;
+
+    try {
+      await axios.patch(`/api/categories/${id}`, {
+        name: editValue,
+      });
+
+      setEditingId(null);
+      setEditValue("");
+      fetchCategories();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Greška pri uređivanju");
+    }
+  };
+
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`/api/categories/${id}`);
@@ -67,25 +94,47 @@ const CategoriesAdmin = () => {
         <button type="submit">Dodaj</button>
       </form>
 
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p>{success}</p>}
+      {error && <p>{error}</p>}
 
       <h3>Postojeće kategorije</h3>
 
       {categories.map((cat) => (
-        <div key={cat.id} style={{ display: "flex", gap: "10px" }}>
-          <span>{cat.name}</span>
-          <button
-            onClick={() => {
-              if (
-                confirm("Jesi li siguran da želiš obrisati ovu kategoriju?")
-              ) {
-                handleDelete(cat.id);
-              }
-            }}
-          >
-            Obriši
-          </button>{" "}
+        <div key={cat.id}>
+          {editingId === cat.id ? (
+            <>
+              <input
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+              />
+              <button onClick={() => saveEdit(cat.id)}>Spremi</button>
+              <button onClick={cancelEdit}>Odustani</button>
+            </>
+          ) : (
+            <>
+              <span>{cat.name}</span>
+
+              {cat.name !== "RAZNO" && (
+                <>
+                  <button onClick={() => startEdit(cat)}>Uredi</button>
+
+                  <button
+                    onClick={() => {
+                      if (
+                        confirm(
+                          "Jesi li siguran da želiš obrisati ovu kategoriju?",
+                        )
+                      ) {
+                        handleDelete(cat.id);
+                      }
+                    }}
+                  >
+                    Obriši
+                  </button>
+                </>
+              )}
+            </>
+          )}
         </div>
       ))}
     </div>
