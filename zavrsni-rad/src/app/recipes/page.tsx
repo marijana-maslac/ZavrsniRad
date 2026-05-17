@@ -11,6 +11,11 @@ const Recipes = async () => {
       ingredients: true,
       steps: true,
       categories: true,
+      comments: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
   const session = await getServerSession(options);

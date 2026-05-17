@@ -4,7 +4,19 @@ import { getServerSession } from "next-auth";
 import options from "../auth/[...nextauth]/options";
 
 export async function GET() {
+  const session = await getServerSession(options);
+
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const categories = await prisma.category.findMany({
+    include: {
+      _count: {
+        select: {
+          recipes: true,
+        },
+      },
+    },
     orderBy: { name: "asc" },
   });
 
@@ -26,6 +38,13 @@ export async function POST(req: NextRequest) {
     const category = await prisma.category.create({
       data: {
         name: body.name,
+      },
+      include: {
+        _count: {
+          select: {
+            recipes: true,
+          },
+        },
       },
     });
 

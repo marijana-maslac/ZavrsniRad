@@ -18,7 +18,7 @@ export async function POST(
   const recipeId = Number(id);
   const { value } = await req.json();
 
-  if (value < 1 || value > 5) {
+  if (!Number.isInteger(value) || value < 1 || value > 5) {
     return NextResponse.json({ error: "Invalid rating" }, { status: 400 });
   }
 

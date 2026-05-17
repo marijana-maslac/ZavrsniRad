@@ -44,6 +44,11 @@ const RecipePage = async ({ params }: Params) => {
           favorites: true,
         },
       },
+      comments: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 

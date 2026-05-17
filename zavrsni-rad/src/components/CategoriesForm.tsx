@@ -6,6 +6,9 @@ import axios from "axios";
 type Category = {
   id: number;
   name: string;
+  _count?: {
+    recipes: number;
+  };
 };
 
 const CategoriesAdmin = () => {
@@ -99,8 +102,10 @@ const CategoriesAdmin = () => {
 
       <h3>Postojeće kategorije</h3>
 
-      {categories.map((cat) => (
+      {categories.map((cat, index) => (
         <div key={cat.id}>
+          {" "}
+          <span>{index + 1}. </span>
           {editingId === cat.id ? (
             <>
               <input
@@ -112,12 +117,12 @@ const CategoriesAdmin = () => {
             </>
           ) : (
             <>
-              <span>{cat.name}</span>
-
+              <span>
+                {cat.name} ({cat._count?.recipes ?? 0})
+              </span>{" "}
               {cat.name !== "RAZNO" && (
                 <>
-                  <button onClick={() => startEdit(cat)}>Uredi</button>
-
+                  <button onClick={() => startEdit(cat)}> Uredi</button>
                   <button
                     onClick={() => {
                       if (
