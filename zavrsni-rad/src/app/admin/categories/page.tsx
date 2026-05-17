@@ -1,12 +1,13 @@
+import options from "@/app/api/auth/[...nextauth]/options";
 import CategoriesForm from "@/components/CategoriesForm";
 import { getServerSession } from "next-auth";
-import options from "../api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
   const session = await getServerSession(options);
 
-  if (!session) {
-    return <p>Samo Admin može upravljati kategorijama.</p>;
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/");
   }
   return (
     <div>

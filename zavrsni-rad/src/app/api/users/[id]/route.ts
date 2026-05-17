@@ -96,11 +96,21 @@ export async function DELETE(
   }
 
   const session = await getServerSession(options);
+  if (!session) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  const isAdmin = session.user.role === "ADMIN";
+  const isSelf = Number(session.user.id) === userId;
 
-  if (!session || Number(session.user.id) !== userId) {
+  if (!isAdmin && !isSelf) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  if (isAdmin && isSelf) {
+    return NextResponse.json(
+      { error: "Ne možeš obrisati vlastiti admin račun" },
+      { status: 403 },
+    );
+  }
   try {
     const recipes = await prisma.recipe.findMany({
       where: { authorId: userId },

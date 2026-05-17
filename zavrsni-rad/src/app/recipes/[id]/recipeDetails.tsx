@@ -1,9 +1,12 @@
+"use client";
 import { Prisma } from "@/generated/prisma/client";
 import DeleteButton from "./deleteButton";
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import BackButton from "./backButton";
 import Rating from "@/components/Rating";
+import { useState } from "react";
+import CommentsModal from "@/components/CommentsModal";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
   include: {
@@ -16,6 +19,7 @@ type RecipeWithRelations = Prisma.RecipeGetPayload<{
         favorites: true;
       };
     };
+    comments: true;
   };
 }>;
 
@@ -27,10 +31,13 @@ interface Props {
 
 const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
   const isOwner = session?.user?.id === recipe.author.id;
-
   const isAdmin = session?.user?.role === "ADMIN";
-
   const canEdit = isOwner || isAdmin;
+
+  const [openComments, setOpenComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(
+    recipe.comments?.length ?? 0,
+  );
 
   return (
     <div>
@@ -50,7 +57,12 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
         </div>
       )}
       <p>{recipe.description}</p>
-      <p>Autor: {recipe.author.username}</p>
+      <p>
+        Autor:{" "}
+        <Link href={`/users/${recipe.author.id}`}>
+          {recipe.author.username}
+        </Link>
+      </p>
       <FavoriteButton
         recipeId={recipe.id}
         initialIsFavorite={initialIsFavorite}
@@ -106,6 +118,16 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
                 </li>
               ))}
           </ol>
+          <button onClick={() => setOpenComments(true)}>
+            Komentari ({commentCount})
+          </button>
+          {openComments && (
+            <CommentsModal
+              recipeId={recipe.id}
+              onClose={() => setOpenComments(false)}
+              setCommentCount={setCommentCount}
+            />
+          )}
         </div>
       )}
       <BackButton />
