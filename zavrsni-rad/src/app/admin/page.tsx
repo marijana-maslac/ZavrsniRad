@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
-import options from "../api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import prisma from "../../../prisma/db";
+import CategoryPieChart from "@/components/CategoryPieChart";
+import options from "@/app/api/auth/[...nextauth]/options";
 
 export default async function AdminPage() {
   const session = await getServerSession(options);
@@ -12,6 +13,20 @@ export default async function AdminPage() {
   }
   const categoriesCount = await prisma.category.count();
   const usersCount = await prisma.user.count();
+
+  const categories = await prisma.category.findMany({
+    include: {
+      _count: {
+        select: {
+          recipes: true,
+        },
+      },
+    },
+  });
+  const chartData = categories.map((c) => ({
+    name: c.name,
+    value: c._count.recipes,
+  }));
 
   const topRating = await prisma.rating.groupBy({
     by: ["recipeId"],
@@ -35,13 +50,15 @@ export default async function AdminPage() {
     },
   });
 
-  const sortedRatings = topRatedRecipes.map((r) => {
-    const match = topRating.find((t) => t.recipeId === r.id);
-    return {
-      ...r,
-      avg: match?._avg.value ?? 0,
-    };
-  });
+  const sortedRatings = topRatedRecipes
+    .map((r) => {
+      const match = topRating.find((t) => t.recipeId === r.id);
+      return {
+        ...r,
+        avg: match?._avg.value ?? 0,
+      };
+    })
+    .sort((a, b) => b.avg - a.avg);
 
   const topFavoriteRecipes = await prisma.recipe.findMany({
     where: {
@@ -49,26 +66,27 @@ export default async function AdminPage() {
     },
   });
 
-  const sortedFavorites = topFavoriteRecipes.map((r) => {
-    const match = topFavorites.find((t) => t.recipeId === r.id);
+  const sortedFavorites = topFavoriteRecipes
+    .map((r) => {
+      const match = topFavorites.find((t) => t.recipeId === r.id);
 
-    return {
-      ...r,
-      favCount: match?._count.recipeId ?? 0,
-    };
-  });
+      return {
+        ...r,
+        favCount: match?._count.recipeId ?? 0,
+      };
+    })
+    .sort((a, b) => b.favCount - a.favCount);
   return (
     <div>
       <h1>Admin panel</h1>
-
       <Link href="/admin/categories">
         Popis kategorija recepata ({categoriesCount})
       </Link>
-      <br></br>
+      <CategoryPieChart data={chartData} />
+      <br></br> <hr />
       <Link href="/admin/users">Popis korisnika ({usersCount})</Link>
-
+      <hr />
       <h2>Top 5 najbolje ocjenjenih recepata</h2>
-
       <ol>
         {sortedRatings.map((r) => (
           <li key={r.id}>
@@ -77,9 +95,9 @@ export default async function AdminPage() {
             </Link>
           </li>
         ))}
-      </ol>
+      </ol>{" "}
+      <hr />
       <h2>Top 5 omiljenih recepata</h2>
-
       <ol>
         {sortedFavorites.map((r) => (
           <li key={r.id}>

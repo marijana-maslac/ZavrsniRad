@@ -3,7 +3,7 @@ import { userSchema } from "../../../../validationSchema/userSchema";
 import prisma from "../../../../prisma/db";
 import bcrypt from "bcryptjs";
 import { getServerSession } from "next-auth";
-import options from "../auth/[...nextauth]/options";
+import options from "@/app/api/auth/[...nextauth]/options";
 
 export async function GET() {
   const session = await getServerSession(options);

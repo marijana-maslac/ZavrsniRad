@@ -10,8 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
   }
 
-  // ⚠️ Ograničenje veličine na 5 MB
-  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_SIZE = 5 * 1024 * 1024;
   if (file.size > MAX_SIZE) {
     return NextResponse.json(
       { error: "File is too large. Max size is 5MB." },

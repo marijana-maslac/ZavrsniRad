@@ -47,68 +47,75 @@ const RegisterForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="form-container">
-      <Controller
-        name="name"
-        control={control}
-        render={({ field }) => (
-          <>
-            <label>Ime</label>
-            <input type="text" {...field} placeholder="Ime..." />
-            {errors.name && (
-              <p className="error-message">{errors.name.message}</p>
-            )}
-          </>
-        )}
-      />
-
-      <Controller
-        name="username"
-        control={control}
-        render={({ field }) => (
-          <>
-            <label>Korisničko ime</label>
-            <input type="text" {...field} placeholder="Username..." />
-            {errors.username && (
-              <p className="error-message">{errors.username.message}</p>
-            )}
-          </>
-        )}
-      />
-
-      <Controller
-        name="email"
-        control={control}
-        render={({ field }) => (
-          <>
-            <label>Email</label>
-            <input type="email" {...field} placeholder="Email..." />
-            {errors.email && (
-              <p className="error-message">{errors.email.message}</p>
-            )}
-          </>
-        )}
-      />
-
-      <Controller
-        name="password"
-        control={control}
-        render={({ field }) => (
-          <>
-            <label>Lozinka</label>
-            <input type="password" {...field} placeholder="Password..." />
-            {errors.password && (
-              <p className="error-message">{errors.password.message}</p>
-            )}
-          </>
-        )}
-      />
-
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Kreiranje..." : "Kreiraj korisnika"}
-      </button>
-      {serverError && <p className="error-message">{serverError}</p>}
-    </form>
+    <div>
+      <br></br>
+      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <>
+              <label>Ime</label>
+              <input type="text" {...field} placeholder="Ime..." />
+              {errors.name && (
+                <p className="error-message">{errors.name.message}</p>
+              )}
+            </>
+          )}
+        />
+        <br></br>
+        <br></br>
+        <Controller
+          name="username"
+          control={control}
+          render={({ field }) => (
+            <>
+              <label>Korisničko ime</label>
+              <input type="text" {...field} placeholder="Username..." />
+              {errors.username && (
+                <p className="error-message">{errors.username.message}</p>
+              )}
+            </>
+          )}
+        />
+        <br></br>
+        <br></br>
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <>
+              <label>Email</label>
+              <input type="email" {...field} placeholder="Email..." />
+              {errors.email && (
+                <p className="error-message">{errors.email.message}</p>
+              )}
+            </>
+          )}
+        />
+        <br></br>
+        <br></br>
+        <Controller
+          name="password"
+          control={control}
+          render={({ field }) => (
+            <>
+              <label>Lozinka</label>
+              <input type="password" {...field} placeholder="Password..." />
+              {errors.password && (
+                <p className="error-message">{errors.password.message}</p>
+              )}
+            </>
+          )}
+        />
+        <br></br>
+        <br></br>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Kreiranje..." : "Kreiraj korisnika"}
+        </button>
+        {serverError && <p className="error-message">{serverError}</p>}
+      </form>
+    </div>
   );
 };
 

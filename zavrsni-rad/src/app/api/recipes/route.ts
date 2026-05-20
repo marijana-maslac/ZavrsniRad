@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recipeSchema } from "../../../../validationSchema/recipeSchema";
 import prisma from "../../../../prisma/db";
-import options from "../auth/[...nextauth]/options";
+import options from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 
 export async function POST(request: NextRequest) {
