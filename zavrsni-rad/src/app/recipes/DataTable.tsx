@@ -1,5 +1,4 @@
 import { Prisma } from "@/generated/prisma/client";
-import DeleteButton from "./[id]/deleteButton";
 import Link from "next/link";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{

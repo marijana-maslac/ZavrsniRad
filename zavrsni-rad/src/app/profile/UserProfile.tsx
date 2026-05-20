@@ -96,17 +96,18 @@ export default function UserProfile({ user }: any) {
       </section>
 
       <hr />
+      {user.role !== "ADMIN" && (
+        <section>
+          <h2>⚠️ Opasna zona</h2>
 
-      <section>
-        <h2>⚠️ Opasna zona</h2>
-
-        <button
-          onClick={handleDeleteAccount}
-          style={{ background: "red", color: "white" }}
-        >
-          Izbriši račun
-        </button>
-      </section>
+          <button
+            onClick={handleDeleteAccount}
+            style={{ background: "red", color: "white" }}
+          >
+            Izbriši račun
+          </button>
+        </section>
+      )}
     </div>
   );
 }

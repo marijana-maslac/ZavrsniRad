@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../prisma/db";
 import { getServerSession } from "next-auth";
-import options from "../auth/[...nextauth]/options";
+import options from "@/app/api/auth/[...nextauth]/options";
 
 export async function GET() {
   const session = await getServerSession(options);
 
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const categories = await prisma.category.findMany({
