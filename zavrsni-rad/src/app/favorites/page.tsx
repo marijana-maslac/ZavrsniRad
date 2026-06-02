@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import options from "@/app/api/auth/[...nextauth]/options";
 import Link from "next/link";
 import prisma from "../../../prisma/db";
+import FavoriteItem from "./FavoriteItem";
 
 export default async function FavoritesPage() {
   const session = await getServerSession(options);
@@ -19,11 +20,8 @@ export default async function FavoritesPage() {
         include: {
           author: true,
           categories: true,
-          favorites: true,
           _count: {
-            select: {
-              favorites: true,
-            },
+            select: { favorites: true },
           },
         },
       },
@@ -37,25 +35,7 @@ export default async function FavoritesPage() {
       {favorites.length === 0 && <p>Nema spremljenih recepata.</p>}
 
       {favorites.map((fav) => (
-        <div key={fav.id} style={{ marginBottom: "20px" }}>
-          <Link href={`/recipes/${fav.recipe.id}`}>
-            <h3>{fav.recipe.title}</h3>
-          </Link>
-
-          {fav.recipe.image && (
-            <img
-              src={fav.recipe.image}
-              alt={fav.recipe.title}
-              style={{ width: "150px", borderRadius: "8px" }}
-            />
-          )}
-
-          <p>Autor: {fav.recipe.author.username}</p>
-
-          <p>
-            Kategorije: {fav.recipe.categories.map((c) => c.name).join(", ")}
-          </p>
-        </div>
+        <FavoriteItem key={fav.id} fav={fav} />
       ))}
     </div>
   );

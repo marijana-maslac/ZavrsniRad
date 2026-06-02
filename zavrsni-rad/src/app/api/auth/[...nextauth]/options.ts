@@ -10,22 +10,22 @@ const options: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "password",
-      name: "Email and password",
+      name: "Username and password",
       credentials: {
-        email: {
-          label: "Email",
+        username: {
+          label: "Username",
           type: "text",
-          placeholder: "Email address",
+          placeholder: "Korisničko ime",
         },
         password: {
           label: "Password",
           type: "password",
-          placeholder: "Password",
+          placeholder: "Lozinka",
         },
       },
       authorize: async (credentials) => {
         const user = await prisma.user.findUnique({
-          where: { email: credentials!.email },
+          where: { username: credentials!.username },
         });
         if (!user) {
           return null;
