@@ -17,7 +17,21 @@ export async function POST(
 
   const recipeId = Number(id);
   const { value } = await req.json();
+  const recipe = await prisma.recipe.findUnique({
+    where: { id: recipeId },
+    select: { authorId: true },
+  });
 
+  if (!recipe) {
+    return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+  }
+
+  if (recipe.authorId === Number(session.user.id)) {
+    return NextResponse.json(
+      { error: "Ne možeš ocijeniti vlastiti recept" },
+      { status: 403 },
+    );
+  }
   if (!Number.isInteger(value) || value < 1 || value > 5) {
     return NextResponse.json({ error: "Invalid rating" }, { status: 400 });
   }

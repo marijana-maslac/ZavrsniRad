@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation";
 export default function SignInPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     await signIn("password", {
-      email,
+      username,
       password,
       callbackUrl: "/",
     });
@@ -23,9 +23,9 @@ export default function SignInPage() {
       <h1>Prijava</h1>
 
       <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Korisničko ime"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
 
       <input
