@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 
 export default async function Home() {
   const topFavorites = await prisma.recipe.findMany({
-    take: 5,
+    take: 6,
     orderBy: {
       favorites: {
         _count: "desc",
@@ -12,14 +12,14 @@ export default async function Home() {
     },
     include: {
       categories: true,
+      _count: { select: { favorites: true } },
     },
   });
 
   const topRated = await prisma.recipe.findMany({
-    take: 5,
+    take: 6,
     include: {
       ratings: true,
-      categories: true,
     },
   });
 
@@ -35,29 +35,59 @@ export default async function Home() {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
-        <div className={styles.heroText}>
-          <h1>Dobrodošli u Recipe App 🍽️</h1>
+        <div className={styles.heroContent}>
+          <h1>Dobrodošli u Recipe App</h1>
+
           <p>
-            Pronađi, ocijeni i spremi svoje omiljene recepte na jednom mjestu.
+            Pronađi, spremi i podijeli svoje omiljene recepte. Istraži recepte
+            drugih korisnika ili dodaj vlastite kulinarske ideje.
           </p>
 
-          <Link className={styles.cta} href="/recipes">
-            Pregledaj sve recepte
-          </Link>
+          <div className={styles.heroButtons}>
+            <Link href="/recipes" className={styles.primaryBtn}>
+              Pregledaj recepte
+            </Link>
+
+            <Link href="/recipes/new" className={styles.secondaryBtn}>
+              Dodaj recept
+            </Link>
+          </div>
+        </div>
+      </section>
+      <section className={styles.features}>
+        <div className={styles.feature}>
+          <span className={styles.featureIcon}>📖</span>
+          <h3>Stotine recepata</h3>
+          <p>Pronađi inspiraciju za svaki obrok na jednom mjestu.</p>
         </div>
 
-        <img src="/food-hero.jpg" alt="food" className={styles.heroImage} />
-      </section>
+        <div className={styles.feature}>
+          <span className={styles.featureIcon}>❤️</span>
+          <h3>Spremi favorite</h3>
+          <p>Sačuvaj recepte koje želiš ponovno pripremati.</p>
+        </div>
 
+        <div className={styles.feature}>
+          <span className={styles.featureIcon}>👥</span>
+          <h3>Dijeli s zajednicom</h3>
+          <p>Otkrij recepte drugih korisnika i podijeli svoje.</p>
+        </div>
+
+        <div className={styles.feature}>
+          <span className={styles.featureIcon}>👨‍🍳</span>
+          <h3>Dodaj vlastite recepte</h3>
+          <p>Kreiraj i organiziraj svoju zbirku omiljenih jela.</p>
+        </div>
+      </section>
       <section className={styles.section}>
         <h2>Kategorije</h2>
 
-        <div className={styles.grid}>
+        <div className={styles.categoryGrid}>
           {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/recipes?categories=${cat.name}`}
-              className={styles.card}
+              className={styles.categoryPill}
             >
               {cat.name}
             </Link>
@@ -66,12 +96,22 @@ export default async function Home() {
       </section>
 
       <section className={styles.section}>
-        <h2>❤️ Najomiljeniji recepti</h2>
+        <h2>❤️ Najomiljeniji</h2>
 
-        <div className={styles.grid}>
+        <div className={styles.cardGrid}>
           {topFavorites.map((r) => (
-            <Link key={r.id} href={`/recipes/${r.id}`} className={styles.card}>
-              {r.title}
+            <Link
+              key={r.id}
+              href={`/recipes/${r.id}`}
+              className={styles.recipeCard}
+              style={{
+                backgroundImage: `url(${r.image || "/food-placeholder.jpg"})`,
+              }}
+            >
+              <div className={styles.overlay}>
+                <h3>{r.title}</h3>
+                <p>❤️ {r._count.favorites}</p>
+              </div>
             </Link>
           ))}
         </div>
@@ -80,10 +120,20 @@ export default async function Home() {
       <section className={styles.section}>
         <h2>⭐ Najbolje ocijenjeni</h2>
 
-        <div className={styles.grid}>
+        <div className={styles.cardGrid}>
           {ratedWithAvg.map((r) => (
-            <Link key={r.id} href={`/recipes/${r.id}`} className={styles.card}>
-              {r.title} ({r.avg.toFixed(1)})
+            <Link
+              key={r.id}
+              href={`/recipes/${r.id}`}
+              className={styles.recipeCard}
+              style={{
+                backgroundImage: `url(${r.image || "/food-placeholder.jpg"})`,
+              }}
+            >
+              <div className={styles.overlay}>
+                <h3>{r.title}</h3>
+                <p>⭐ {r.avg.toFixed(1)}</p>
+              </div>
             </Link>
           ))}
         </div>

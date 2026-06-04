@@ -20,8 +20,8 @@ export const recipeSchema = z.object({
   categories: z.array(z.number()).min(1, "Odaberi barem jednu kategoriju"),
   ingredients: z.array(
     z.object({
-      name: z.string(),
-      amount: z.number().min(0).optional(),
+      name: z.string().min(1, "Sastojak je obavezan"),
+      amount: z.number().min(0, "Mora biti 0 ili više").optional(),
       unit: z
         .enum(["G", "DAG", "KG", "ML", "DL", "L", "KOM", "TBSP", "TSP"])
         .optional(),
@@ -29,7 +29,8 @@ export const recipeSchema = z.object({
   ),
   steps: z.array(
     z.object({
-      description: z.string(),
+      id: z.number().optional(),
+      description: z.string().min(1, "Opis koraka je obavezan"),
       image: z.any().optional(),
       removeImage: z.boolean().optional(),
     }),

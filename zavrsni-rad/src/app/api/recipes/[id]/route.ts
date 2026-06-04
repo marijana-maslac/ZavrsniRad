@@ -63,43 +63,22 @@ export async function PATCH(
       }
     }
 
-    for (const step of body.steps) {
-      if (step.id) {
-        const existingStep = existingRecipe.steps.find(
-          (s: any) => s.id === step.id,
-        );
-
-        if (step.image === null && existingStep?.image) {
-          deleteImage(existingStep.image);
-        }
-
-        if (
-          step.image &&
-          existingStep?.image &&
-          step.image !== existingStep.image
-        ) {
-          deleteImage(existingStep.image);
-        }
-
-        await prisma.step.update({
-          where: { id: step.id },
-          data: {
-            description: step.description,
-            step_order: step.step_order,
-            image: step.image,
-          },
-        });
-      } else {
-        await prisma.step.create({
-          data: {
-            recipeId,
-            description: step.description,
-            step_order: step.step_order,
-            image: step.image,
-          },
-        });
-      }
+    for (const step of existingRecipe.steps) {
+      if (step.image) deleteImage(step.image);
     }
+
+    await prisma.step.deleteMany({
+      where: { recipeId },
+    });
+
+    await prisma.step.createMany({
+      data: body.steps.map((step: any, index: number) => ({
+        recipeId,
+        description: step.description,
+        step_order: index + 1,
+        image: step.image ?? null,
+      })),
+    });
     if (
       body.image &&
       existingRecipe.image &&

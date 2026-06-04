@@ -1,57 +1,242 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 30px;
+  padding-bottom: 60px;
+  content: "";
+  position: relative;
+  background: url("/pozadina.png");
+  background-size: 500px;
 }
-
-/* HERO */
 .hero {
+  height: 80vh;
+  background: url("/heroPozadina.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.heroContent {
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  max-width: 480px;
+  color: #1f2937;
+}
+
+.heroContent h1 {
+  font-size: 4rem;
+  line-height: 1.05;
+  font-weight: 800;
+  margin-bottom: 20px;
+  letter-spacing: -2px;
+}
+
+.heroContent p {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #4b5563;
+}
+
+/* HERO BUTTONS */
+.heroButtons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 60px;
-  background: #f8f8f8;
-  border-radius: 16px;
+  gap: 16px;
+  margin-top: 32px;
 }
 
-.heroText {
-  max-width: 500px;
-}
-
-.heroImage {
-  width: 400px;
-  border-radius: 12px;
-}
-
-.cta {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 10px 16px;
-  background: black;
+.primaryBtn {
+  background: #d57f07;
   color: white;
-  border-radius: 8px;
+
+  padding: 14px 28px;
+  border-radius: 12px;
+
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: all 0.2s;
 }
 
-/* SECTIONS */
+.primaryBtn:hover {
+  background: #e97406e2;
+  transform: translateY(-2px);
+}
+
+.secondaryBtn {
+  background: white;
+  color: #dd8306e0;
+
+  border: 2px solid #dd8306e3;
+
+  padding: 14px 28px;
+  border-radius: 12px;
+
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+  background: #f7faf7;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
 .section {
-  padding: 20px;
+  padding: 0 40px;
 }
 
-.grid {
+.section h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.features {
+  margin-top: -30px;
+
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-top: 20px;
+  grid-template-columns: repeat(4, 1fr);
+
+  background: #fff0cadd;
+  padding: 22px;
+  backdrop-filter: blur(10px);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-.card {
-  border: 1px solid #ddd;
-  padding: 12px;
-  border-radius: 10px;
+.feature {
   text-align: center;
-  transition: 0.2s;
+  padding: 10px 20px;
 }
 
-.card:hover {
-  transform: scale(1.05);
+.featureIcon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.feature h3 {
+  margin-bottom: 8px;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.feature p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+/* =========================
+   CATEGORY PILLS
+========================= */
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.categoryPill {
+  height: 180px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  border-radius: 10px;
+
+  background: linear-gradient(170deg, #dd8306e0, #e8984ee9);
+  color: white;
+  text-decoration: none;
+
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.categoryPill:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 10px rgba(232, 197, 132, 0.829);
+}
+/* =========================
+   RECIPE CARDS
+========================= */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.recipeCard {
+  height: 260px;
+  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.recipeCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+/* overlay na karticama */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.1));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+}
+
+.overlay h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.overlay p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* =========================
+   SMALL IMPROVEMENTS
+========================= */
+
+@media (max-width: 768px) {
+  .heroContent {
+    left: 20px;
+    bottom: 30px;
+    right: 20px;
+  }
+
+  .heroContent h1 {
+    font-size: 38px;
+  }
+
+  .section {
+    padding: 0 20px;
+  }
 }

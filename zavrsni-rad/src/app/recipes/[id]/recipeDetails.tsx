@@ -7,7 +7,6 @@ import BackButton from "./backButton";
 import Rating from "@/components/Rating";
 import { useState } from "react";
 import CommentsModal from "@/components/CommentsModal";
-import error from "next/error";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
   include: {

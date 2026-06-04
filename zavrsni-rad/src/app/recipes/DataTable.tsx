@@ -1,62 +1,19 @@
-import { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
+import styles from "./DataTable.module.css";
 
-type RecipeWithRelations = Prisma.RecipeGetPayload<{
-  include: {
-    author: true;
-  };
-}>;
-
-interface Props {
-  recipes: RecipeWithRelations[];
-}
-
-const DataTable = ({ recipes }: Props) => {
+export default function DataTable({ recipes }: any) {
   return (
-    <div>
-      <br></br>
-      <table border={1}>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Naslov</th>
-            <th>Opis</th>
-            <th>Vrijeme kuhanja</th>
-            <th>Težina</th>
-            <th>Detaljno</th>
-            <th>autor</th>
-          </tr>
-        </thead>
+    <div className={styles.container}>
+      {recipes.map((r: any) => (
+        <Link key={r.id} href={`/recipes/${r.id}`} className={styles.card}>
+          <img src={r.image || "/food-placeholder.jpg"} />
 
-        <tbody>
-          {recipes.map((recipe) => (
-            <tr key={recipe.id}>
-              <td>
-                {recipe.image ? (
-                  <img
-                    src={recipe.image}
-                    alt={recipe.title}
-                    width={100}
-                    style={{ objectFit: "cover" }}
-                  />
-                ) : (
-                  <span></span>
-                )}
-              </td>
-              <td>{recipe.title}</td>
-              <td>{recipe.description}</td>
-              <td>{recipe.cooking_time} min</td>
-              <td>{recipe.difficulty}</td>
-              <th>
-                <Link href={"/recipes/" + recipe.id}>Detaljno</Link>
-              </th>
-              <td>{recipe.author.name}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <div className={styles.info}>
+            <div className={styles.title}>{r.title}</div>
+            <div className={styles.author}>{r.author.name}</div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
-};
-
-export default DataTable;
+}
