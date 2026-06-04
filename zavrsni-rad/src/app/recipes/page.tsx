@@ -4,6 +4,7 @@ import DataTable from "./DataTable";
 import Filters from "./Filters";
 import { getServerSession } from "next-auth";
 import options from "@/app/api/auth/[...nextauth]/options";
+import styles from "./DataTable.module.css";
 
 type SearchParams = {
   search?: string;
@@ -36,28 +37,7 @@ export default async function Recipes({ searchParams }: Props) {
       mode: "insensitive",
     };
   }
-  let recipeIdsByRating: number[] | null = null;
 
-  if (sp.sort === "rating") {
-    const ratings = await prisma.rating.groupBy({
-      by: ["recipeId"],
-      _avg: {
-        value: true,
-      },
-      orderBy: {
-        _avg: {
-          value: "desc",
-        },
-      },
-    });
-
-    recipeIdsByRating = ratings.map((r) => r.recipeId);
-  }
-  if (recipeIdsByRating) {
-    where.id = {
-      in: recipeIdsByRating,
-    };
-  }
   if (sp.difficulty) {
     where.difficulty = sp.difficulty;
   }
@@ -70,6 +50,40 @@ export default async function Recipes({ searchParams }: Props) {
         },
       },
     };
+  }
+
+  let recipeOrder: number[] | null = null;
+
+  if (sp.sort === "rating") {
+    const ratings = await prisma.rating.groupBy({
+      by: ["recipeId"],
+      _avg: {
+        value: true,
+      },
+      _count: {
+        value: true,
+      },
+      orderBy: [
+        {
+          _avg: {
+            value: "desc",
+          },
+        },
+        {
+          _count: {
+            value: "desc",
+          },
+        },
+      ],
+    });
+
+    recipeOrder = ratings.map((r) => r.recipeId);
+
+    if (recipeOrder.length > 0) {
+      where.id = {
+        in: recipeOrder,
+      };
+    }
   }
 
   let orderBy: any = { createdAt: "desc" };
@@ -93,24 +107,31 @@ export default async function Recipes({ searchParams }: Props) {
       comments: {
         include: { user: true },
       },
+      ratings: true,
     },
   });
 
-  if (recipeIdsByRating) {
+  if (recipeOrder) {
     recipes = recipes.sort(
-      (a, b) =>
-        recipeIdsByRating!.indexOf(a.id) - recipeIdsByRating!.indexOf(b.id),
+      (a, b) => recipeOrder!.indexOf(a.id) - recipeOrder!.indexOf(b.id),
     );
   }
 
   return (
-    <div className="flex gap-6">
+    <div>
+      <br></br>
+      <div className={styles.header}>
+        <h1>Svi recepti</h1>
+
+        {session && (
+          <Link href="/recipes/new" className={styles.addNew}>
+            + Dodaj novi recept
+          </Link>
+        )}
+      </div>
       <Filters categories={categories} />
-
-      <div className="flex-1">
+      <div>
         <br />
-
-        {session && <Link href="/recipes/new">Dodaj novi recept</Link>}
 
         <DataTable recipes={recipes} />
       </div>

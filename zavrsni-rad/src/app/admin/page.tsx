@@ -13,7 +13,7 @@ export default async function AdminPage() {
   }
   const categoriesCount = await prisma.category.count();
   const usersCount = await prisma.user.count();
-
+  const totalRecipes = await prisma.recipe.count();
   const categories = await prisma.category.findMany({
     include: {
       _count: {
@@ -83,6 +83,8 @@ export default async function AdminPage() {
         Popis kategorija recepata ({categoriesCount})
       </Link>
       <CategoryPieChart data={chartData} />
+      <br></br> <hr />
+      <p>Ukupan broj recepata: {totalRecipes}</p>
       <br></br> <hr />
       <Link href="/admin/users">Popis korisnika ({usersCount})</Link>
       <hr />

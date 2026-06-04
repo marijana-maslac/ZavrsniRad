@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 type Category = {
   id: number;
@@ -118,7 +119,11 @@ const CategoriesAdmin = () => {
           ) : (
             <>
               <span>
-                {cat.name} ({cat._count?.recipes ?? 0})
+                <Link href={`/recipes?categories=${cat.name}`}>
+                  <span>
+                    {cat.name} ({cat._count?.recipes ?? 0})
+                  </span>
+                </Link>{" "}
               </span>{" "}
               {cat.name !== "RAZNO" && (
                 <>
