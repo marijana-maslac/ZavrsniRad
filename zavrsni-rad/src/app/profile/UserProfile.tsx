@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import styles from "./page.module.css";
 
 export default function UserProfile({ user }: any) {
   const router = useRouter();
@@ -38,76 +39,101 @@ export default function UserProfile({ user }: any) {
   };
 
   return (
-    <div>
-      <h1>👤 {user?.name} </h1>
-
-      <section>
-        <h2>Moji podaci</h2>
-
-        {!editMode ? (
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header}>
           <div>
-            <p>
-              <b>Ime:</b> {user.name}
-            </p>
-            <p>
-              <b>Username:</b> {user.username}
-            </p>
-            <p>
-              <b>Email:</b> {user.email}
-            </p>
-
-            <button onClick={() => setEditMode(true)}>Uredi profil</button>
+            <h1>{user?.name}</h1>
+            <p className={styles.subtitle}>Tvoj mali kutak s receptima</p>
           </div>
-        ) : (
-          <div>
-            <b>Ime:</b>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
-            <b>Username:</b>
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <b>Email:</b>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
 
-            <button onClick={handleSave}>Spremi</button>
-            <button onClick={() => setEditMode(false)}>Otkaži</button>
+        <div className={styles.card}>
+          <h2>Moji podaci</h2>
+
+          {!editMode ? (
+            <div className={styles.info}>
+              <p>
+                <b>Ime:</b> {user.name}
+              </p>
+              <p>
+                <b>Username:</b> {user.username}
+              </p>
+              <p>
+                <b>Email:</b> {user.email}
+              </p>
+
+              <button
+                onClick={() => setEditMode(true)}
+                className={styles.btnPrimary}
+              >
+                Uredi profil
+              </button>
+            </div>
+          ) : (
+            <div className={styles.form}>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ime"
+              />
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+              />
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+              />
+
+              <div className={styles.row}>
+                <button onClick={handleSave} className={styles.btnPrimary}>
+                  Spremi
+                </button>
+                <button
+                  onClick={() => setEditMode(false)}
+                  className={styles.btnSecondary}
+                >
+                  Otkaži
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.card}>
+          <h2>🍲 Moji recepti</h2>
+
+          {user.recipes.length === 0 && (
+            <p className={styles.muted}>Nema recepata još.</p>
+          )}
+
+          <div className={styles.recipes}>
+            {user.recipes.map((r: any) => (
+              <Link
+                key={r.id}
+                href={`/recipes/${r.id}`}
+                className={styles.recipeCard}
+              >
+                <h3>{r.title}</h3>
+                <span>➡️ otvori</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* DANGER ZONE */}
+        {user.role !== "ADMIN" && (
+          <div className={`${styles.card} ${styles.danger}`}>
+            <h2>⚠️ Opasna zona</h2>
+            <button onClick={handleDeleteAccount} className={styles.btnDanger}>
+              Izbriši račun
+            </button>
           </div>
         )}
-      </section>
-
-      <hr />
-
-      <section>
-        <h2>🍲 Moji recepti</h2>
-
-        {user.recipes.length === 0 && <p>Nema recepata</p>}
-
-        {user.recipes.map((r: any) => (
-          <div key={r.id} style={{ marginBottom: "10px" }}>
-            <Link href={`/recipes/${r.id}`}>
-              <h3>{r.title}</h3>
-            </Link>
-            <Link href={`/recipes/edit/${r.id}`}>
-              <button>Uredi recept</button>
-            </Link>
-          </div>
-        ))}
-      </section>
-
-      <hr />
-      {user.role !== "ADMIN" && (
-        <section>
-          <h2>⚠️ Opasna zona</h2>
-
-          <button
-            onClick={handleDeleteAccount}
-            style={{ background: "red", color: "white" }}
-          >
-            Izbriši račun
-          </button>
-        </section>
-      )}
+      </div>
     </div>
   );
 }

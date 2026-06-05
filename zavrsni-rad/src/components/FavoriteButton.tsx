@@ -4,7 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-
+import styles from "../styles/FavoriteButton.module.css";
 interface Props {
   recipeId: number;
   initialIsFavorite?: boolean;
@@ -39,8 +39,12 @@ const FavoriteButton = ({ recipeId, initialIsFavorite = false }: Props) => {
 
   return (
     <div>
-      <button onClick={handleToggle} disabled={loading}>
-        {isFavorite ? "❤️ Ukloni iz omiljenih" : "🤍 Dodaj u omiljene"}
+      <button
+        onClick={handleToggle}
+        disabled={loading}
+        className={styles.favoriteButton}
+      >
+        {isFavorite ? "❤️ " : "🤍 "}
       </button>
       {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import styles from "../styles/CommentsModal.module.css";
 
 export default function CommentsModal({
   recipeId,
@@ -69,61 +70,37 @@ export default function CommentsModal({
 
   return (
     <div
-      style={overlay}
+      className={styles.overlay}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div style={modal}>
-        <button onClick={onClose}>X</button>
-        <h2>Komentari ({comments.length})</h2>
-        {session && (
-          <div>
-            <textarea
-              maxLength={1000}
-              style={{ marginTop: "10px" }}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Napiši komentar..."
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-            />
-            <button onClick={submitComment}>Pošalji</button>
-          </div>
-        )}{" "}
-        {!session && <p>Prijavi se za komentiranje</p>}
-        <div style={{ overflowY: "auto", flex: 1 }}>
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <span>Komentari ({comments.length})</span>
+          <button className={styles.closeBtn} onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <div className={styles.body}>
           {comments.map((c) => (
-            <div key={c.id}>
-              <b>{c.user.username}</b>
-              <p>
-                {c.content}
-                {c.image && (
-                  <img
-                    src={c.image}
-                    alt="comment"
-                    style={{
-                      width: "200px",
-                      marginTop: "10px",
-                      borderRadius: "8px",
-                    }}
-                  />
-                )}
-              </p>
-              <small>{new Date(c.createdAt).toLocaleString()}</small>
+            <div key={c.id} className={styles.commentCard}>
+              <div className={styles.username}>{c.user.username}</div>
+              <div>{c.content}</div>
+
+              {c.image && <img src={c.image} className={styles.img} />}
+
+              <div className={styles.date}>
+                {new Date(c.createdAt).toLocaleString()}
+              </div>
 
               {(session?.user?.id === c.user.id ||
                 session?.user?.role === "ADMIN") && (
                 <button
+                  className={styles.deleteBtn}
                   onClick={() => {
-                    if (
-                      confirm("Jesi li siguran da želiš obrisati komentar?")
-                    ) {
-                      deleteComment(c.id);
-                    }
+                    if (confirm("Obrisati komentar?")) deleteComment(c.id);
                   }}
                 >
                   Obriši
@@ -132,31 +109,32 @@ export default function CommentsModal({
             </div>
           ))}
         </div>
+
+        <div className={styles.form}>
+          {session ? (
+            <>
+              <textarea
+                className={styles.textarea}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Napiši komentar..."
+              />
+
+              <input
+                className={styles.fileInput}
+                type="file"
+                onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              />
+
+              <button className={styles.sendBtn} onClick={submitComment}>
+                Pošalji
+              </button>
+            </>
+          ) : (
+            <p>Prijavi se za komentiranje</p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
-const overlay: React.CSSProperties = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100vw",
-  height: "100vh",
-  background: "rgba(0,0,0,0.6)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 9999,
-};
-
-const modal: React.CSSProperties = {
-  width: "500px",
-  maxHeight: "80vh",
-  background: "white",
-  borderRadius: "12px",
-  padding: "20px",
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-};

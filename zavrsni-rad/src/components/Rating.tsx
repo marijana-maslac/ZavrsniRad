@@ -14,10 +14,10 @@ export default function Rating({ recipeId }: Props) {
   const [value, setValue] = useState(0);
   const [avg, setAvg] = useState(0);
   const [count, setCount] = useState(0);
-
+  const [hoverValue, setHoverValue] = useState(0);
   useEffect(() => {
     fetchAverage();
-  }, []);
+  }, [recipeId]);
 
   useEffect(() => {
     if (session) {
@@ -56,26 +56,29 @@ export default function Rating({ recipeId }: Props) {
 
   return (
     <div style={{ marginTop: "20px" }}>
-      <p>
-        ⭐ Ocjena: {avg.toFixed(1)} ({count})
-      </p>
+      <p></p>
 
       <div>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            onClick={() => submitRating(star)}
-            style={{
-              fontSize: "20px",
-              color: star <= value ? "gold" : "gray",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            ★
-          </button>
-        ))}
+        <p>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => submitRating(star)}
+              onMouseEnter={() => setHoverValue(star)}
+              onMouseLeave={() => setHoverValue(0)}
+              style={{
+                fontSize: "20px",
+                color: star <= (hoverValue || value) ? "gold" : "gray",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              ★
+            </button>
+          ))}
+          {avg.toFixed(1)} ({count})
+        </p>
       </div>
 
       {!session && <p>Prijavi se za ocjenjivanje</p>}

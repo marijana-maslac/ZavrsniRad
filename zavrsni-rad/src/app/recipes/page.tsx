@@ -118,7 +118,7 @@ export default async function Recipes({ searchParams }: Props) {
   }
 
   return (
-    <div>
+    <div className={styles.page}>
       <br></br>
       <div className={styles.header}>
         <h1>Svi recepti</h1>

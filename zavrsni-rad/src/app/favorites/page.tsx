@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
 import options from "@/app/api/auth/[...nextauth]/options";
-import Link from "next/link";
 import prisma from "../../../prisma/db";
 import FavoriteItem from "./FavoriteItem";
-
+import styles from "./page.module.css";
 export default async function FavoritesPage() {
   const session = await getServerSession(options);
 
@@ -29,14 +28,16 @@ export default async function FavoritesPage() {
   });
 
   return (
-    <div>
+    <div className={styles.page}>
+      <br></br>
       <h1>❤️ Omiljeni recepti</h1>
 
       {favorites.length === 0 && <p>Nema spremljenih recepata.</p>}
-
-      {favorites.map((fav) => (
-        <FavoriteItem key={fav.id} fav={fav} />
-      ))}
+      <div className={styles.grid}>
+        {favorites.map((fav) => (
+          <FavoriteItem key={fav.id} fav={fav} />
+        ))}
+      </div>
     </div>
   );
 }

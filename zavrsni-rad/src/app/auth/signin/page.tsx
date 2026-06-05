@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -19,28 +20,39 @@ export default function SignInPage() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "0 auto" }}>
-      <h1>Prijava</h1>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Prijavi se na RecipeApp</h1>
 
-      <input
-        placeholder="Korisničko ime"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+        <input
+          className={styles.input}
+          placeholder="Korisničko ime"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-      <input
-        placeholder="Lozinka"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          className={styles.input}
+          placeholder="Lozinka"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <button onClick={handleLogin}>Prijavi se</button>
+        <button onClick={handleLogin} className={styles.button}>
+          Prijavi se
+        </button>
 
-      <p style={{ marginTop: 20 }}>
-        Nemaš račun?{" "}
-        <button onClick={() => router.push("/register")}>Kreiraj profil</button>
-      </p>
+        <p className={styles.footer}>
+          Nemaš račun?{" "}
+          <span
+            onClick={() => router.push("/register")}
+            className={styles.link}
+          >
+            Kreiraj profil
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
