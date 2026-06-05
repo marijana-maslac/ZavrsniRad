@@ -6,7 +6,7 @@ import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { userSchema } from "../../validationSchema/userSchema";
-
+import styles from "../styles/RegisterForm.module.css";
 type RegisterFormData = z.infer<typeof userSchema>;
 
 const RegisterForm = () => {
@@ -49,7 +49,7 @@ const RegisterForm = () => {
   return (
     <div>
       <br></br>
-      <form onSubmit={handleSubmit(onSubmit)} className="form-container">
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
         <Controller
           name="name"
           control={control}
@@ -58,7 +58,7 @@ const RegisterForm = () => {
               <label>Ime</label>
               <input type="text" {...field} placeholder="Ime..." />
               {errors.name && (
-                <p className="error-message">{errors.name.message}</p>
+                <p className={styles.error}>{errors.name.message}</p>
               )}
             </>
           )}
@@ -73,7 +73,7 @@ const RegisterForm = () => {
               <label>Korisničko ime</label>
               <input type="text" {...field} placeholder="Username..." />
               {errors.username && (
-                <p className="error-message">{errors.username.message}</p>
+                <p className={styles.error}>{errors.username.message}</p>
               )}
             </>
           )}
@@ -88,7 +88,7 @@ const RegisterForm = () => {
               <label>Email</label>
               <input type="email" {...field} placeholder="Email..." />
               {errors.email && (
-                <p className="error-message">{errors.email.message}</p>
+                <p className={styles.error}>{errors.email.message}</p>
               )}
             </>
           )}
@@ -103,7 +103,7 @@ const RegisterForm = () => {
               <label>Lozinka</label>
               <input type="password" {...field} placeholder="Password..." />
               {errors.password && (
-                <p className="error-message">{errors.password.message}</p>
+                <p className={styles.error}>{errors.password.message}</p>
               )}
             </>
           )}
@@ -113,7 +113,7 @@ const RegisterForm = () => {
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Kreiranje..." : "Kreiraj korisnika"}
         </button>
-        {serverError && <p className="error-message">{serverError}</p>}
+        {serverError && <p className={styles.error}>{serverError}</p>}
       </form>
     </div>
   );

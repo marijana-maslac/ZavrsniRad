@@ -3,6 +3,7 @@
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
 
 export default function FavoriteItem({ fav }: any) {
   const router = useRouter();
@@ -16,26 +17,24 @@ export default function FavoriteItem({ fav }: any) {
   };
 
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className={styles.card}>
       <Link href={`/recipes/${fav.recipe.id}`}>
-        <h3>{fav.recipe.title}</h3>
+        {fav.recipe.image && (
+          <img src={fav.recipe.image} className={styles.image} />
+        )}
+
+        <h3 className={styles.title}>{fav.recipe.title}</h3>
+
+        <p className={styles.author}>{fav.recipe.author.username}</p>
+
+        <p className={styles.categories}>
+          {fav.recipe.categories.map((c: any) => c.name).join(", ")}
+        </p>
       </Link>
 
-      {fav.recipe.image && (
-        <img
-          src={fav.recipe.image}
-          alt={fav.recipe.title}
-          style={{ width: "150px", borderRadius: "8px" }}
-        />
-      )}
-
-      <p>Autor: {fav.recipe.author.username}</p>
-
-      <p>
-        Kategorije: {fav.recipe.categories.map((c: any) => c.name).join(", ")}
-      </p>
-
-      <button onClick={remove}>❌ Makni iz favorita</button>
+      <button onClick={remove} className={styles.removeBtn}>
+        Ukloni iz omiljenih
+      </button>
     </div>
   );
 }

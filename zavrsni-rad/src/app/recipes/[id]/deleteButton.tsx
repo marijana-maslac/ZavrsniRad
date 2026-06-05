@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   recipeId: number;
+  className?: string;
 }
 
-const DeleteButton = ({ recipeId }: Props) => {
+const DeleteButton = ({ recipeId, className }: Props) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -32,11 +33,7 @@ const DeleteButton = ({ recipeId }: Props) => {
   };
 
   return (
-    <button
-      onClick={handleDelete}
-      disabled={isDeleting}
-      style={{ color: "white", backgroundColor: "red", padding: "5px 10px" }}
-    >
+    <button onClick={handleDelete} disabled={isDeleting} className={className}>
       {isDeleting ? "Brisanje..." : "Obriši"}
     </button>
   );

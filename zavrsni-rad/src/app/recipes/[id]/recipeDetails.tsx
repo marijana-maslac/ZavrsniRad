@@ -7,6 +7,7 @@ import BackButton from "./backButton";
 import Rating from "@/components/Rating";
 import { useState } from "react";
 import CommentsModal from "@/components/CommentsModal";
+import styles from "./recipeDetails.module.css";
 
 type RecipeWithRelations = Prisma.RecipeGetPayload<{
   include: {
@@ -40,86 +41,51 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
   );
 
   return (
-    <div>
-      <h1>{recipe.title}</h1>
-      {recipe.image && (
-        <div style={{ marginBottom: "20px" }}>
-          <img
-            src={recipe.image}
-            alt={recipe.title}
-            style={{
-              maxWidth: "300px",
-              width: "100%",
-              height: "auto",
-              borderRadius: "8px",
-            }}
-          />
-        </div>
-      )}
-      <p>{recipe.description}</p>
-      <p>
-        Autor:{" "}
-        <Link href={`/users/${recipe.author.id}`}>
-          {recipe.author.username}
-        </Link>
-      </p>
-      <FavoriteButton
-        recipeId={recipe.id}
-        initialIsFavorite={initialIsFavorite}
-      />
-      <p>❤️ {recipe._count?.favorites ?? 0} osoba je spremila ovaj recept</p>{" "}
-      <Rating recipeId={recipe.id} />
-      <div>
-        <p>Kategorije:</p>
-        <ul>
-          {recipe.categories?.map((cat) => (
-            <li key={cat.id}>{cat.name}</li>
-          ))}
-        </ul>
-      </div>{" "}
-      <p>Vrijeme kuhanja: {recipe.cooking_time} min</p>
-      <p>Težina: {recipe.difficulty}</p>
-      <p>Broj porcija: {recipe.servings}</p>
-      {recipe.ingredients && (
-        <div>
-          <h3>Sastojci:</h3>
-          <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
-            {recipe.ingredients.map((ing) => (
-              <li key={ing.id}>
-                {ing.name} {ing.amount ?? ""} {ing.unit ?? ""}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {recipe.steps && (
-        <div>
-          <h3>Koraci:</h3>
-          <ol>
-            {recipe.steps
-              .sort((a, b) => a.step_order - b.step_order)
-              .map((step, index) => (
-                <li key={step.id}>
-                  <strong>{index + 1}. korak:</strong> {step.description}{" "}
-                  {step.image && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <img
-                        src={step.image}
-                        alt={"stepimage"}
-                        style={{
-                          maxWidth: "300px",
-                          width: "100%",
-                          height: "auto",
-                          borderRadius: "8px",
-                        }}
-                      />
-                    </div>
-                  )}
-                </li>
+    <div className={styles.page}>
+      <BackButton className={`${styles.actionBtn} ${styles.secondaryBtn}`} />
+      <section className={styles.hero}>
+        <div className={styles.heroInfo}>
+          <div className={styles.favoriteSection}>
+            <FavoriteButton
+              recipeId={recipe.id}
+              initialIsFavorite={initialIsFavorite}
+            />
+            <span>{recipe._count?.favorites ?? 0}</span>
+          </div>
+          <p className={styles.author}>
+            <Link href={`/users/${recipe.author.id}`}>
+              {recipe.author.username}
+            </Link>
+          </p>
+          <p style={{ fontSize: "10px", fontFamily: "Poppins, sans-serif" }}>
+            {new Date(recipe.createdAt).toLocaleDateString("hr-HR")}
+          </p>
+          <div className={styles.titleRow}>
+            <h1>{recipe.title}</h1>
+          </div>
+          <p className={styles.description}>{recipe.description}</p>
+          <div className={styles.categories}>
+            <span>
+              {recipe.categories?.map((cat) => (
+                <span key={cat.id}>
+                  {cat.name} <br></br>
+                </span>
               ))}
-          </ol>
-          <button onClick={() => setOpenComments(true)}>
-            Komentari ({commentCount})
+            </span>
+          </div>
+        </div>
+        <div className={styles.heroImage}>
+          {recipe.image && <img src={recipe.image} alt={recipe.title} />}
+        </div>
+      </section>
+      <section className={styles.stats}>
+        <div className={styles.statCardInteractive}>
+          <Rating recipeId={recipe.id} />
+          <button
+            onClick={() => setOpenComments(true)}
+            className={styles.commentBtn}
+          >
+            Napiši komentar ({commentCount})
           </button>
           {openComments && (
             <CommentsModal
@@ -129,16 +95,72 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
             />
           )}
         </div>
-      )}
-      <BackButton />
-      {canEdit && (
-        <Link href={`/recipes/edit/${recipe.id}`}>
-          <button style={{ padding: "5px 10px", marginBottom: "20px" }}>
-            Uredi
-          </button>
-        </Link>
-      )}
-      {canEdit && <DeleteButton recipeId={recipe.id} />}
+        <div className={styles.statCard}>
+          <p>Vrijeme kuhanja</p>⏱ {recipe.cooking_time} min
+        </div>
+        <div className={styles.statCard}>
+          <p>Težina kuhanja</p>👨‍🍳 {recipe.difficulty}
+        </div>
+        <div className={styles.statCard}>
+          <p>Broj porcija</p>🍽 {recipe.servings}
+        </div>
+      </section>
+      <section className={styles.content}>
+        <aside className={styles.ingredients}>
+          <h2>Sastojci</h2>
+          <br></br>
+          <ul>
+            {recipe.ingredients.map((ing) => (
+              <li key={ing.id}>
+                {ing.name} {ing.amount ?? ""} {ing.unit ?? ""}
+              </li>
+            ))}
+          </ul>
+        </aside>
+        <div className={styles.steps}>
+          <h2>Priprema</h2>
+
+          {recipe.steps
+            .sort((a, b) => a.step_order - b.step_order)
+            .map((step, index) => (
+              <div key={step.id} className={styles.stepCard}>
+                <div className={styles.stepText}>
+                  <h3>{index + 1}.</h3>
+
+                  <p>{step.description}</p>
+                </div>
+                {step.image && (
+                  <img
+                    src={step.image}
+                    alt={`Korak ${index + 1}`}
+                    style={{
+                      maxWidth: "300px",
+                      width: "100%",
+                      height: "auto",
+                      borderRadius: "8px",
+                    }}
+                    className={styles.stepImage}
+                  />
+                )}
+              </div>
+            ))}
+        </div>
+      </section>
+      <section className={styles.actions}>
+        {canEdit && (
+          <Link href={`/recipes/edit/${recipe.id}`}>
+            <button className={`${styles.actionBtn} ${styles.primaryBtn}`}>
+              Uredi
+            </button>
+          </Link>
+        )}
+        {canEdit && (
+          <DeleteButton
+            recipeId={recipe.id}
+            className={`${styles.actionBtn} ${styles.dangerBtn}`}
+          />
+        )}
+      </section>
     </div>
   );
 };

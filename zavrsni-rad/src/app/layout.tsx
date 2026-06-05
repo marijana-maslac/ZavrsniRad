@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import MainNav from "@/components/mainNav";
 import Providers from "./providers";
+import styles from "./page.module.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,12 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <MainNav />
         <Providers>{children}</Providers>
+        <footer className={styles.footer}>
+          <p>
+            © {new Date().getFullYear()} Recipe App by Marijana Maslać,
+            Sveučilišni odjel za stručne studije, Split
+          </p>
+        </footer>
       </body>
     </html>
   );

@@ -7,7 +7,7 @@
   padding: 18px;
   margin-bottom: 20px;
 
-  background: white;
+  background: rgba(248, 232, 211, 0.51);
   border-radius: 18px;
 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
@@ -20,7 +20,7 @@
 
   border: 2px solid #f3f4f6;
   border-radius: 14px;
-
+  background-color: rgba(255, 252, 249, 0.69);
   font-size: 15px;
 
   outline: none;
