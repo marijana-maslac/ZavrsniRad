@@ -15,6 +15,12 @@ export default function UserProfile({ user }: any) {
   const [name, setName] = useState(user.name || "");
   const [username, setUsername] = useState(user.username || "");
   const [email, setEmail] = useState(user.email || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMode, setPasswordMode] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const handleSave = async () => {
     await axios.patch(`/api/users/${user.id}`, {
@@ -37,7 +43,35 @@ export default function UserProfile({ user }: any) {
       alert("Greška pri brisanju računa");
     }
   };
+  const handleChangePassword = async () => {
+    try {
+      await axios.patch(`/api/users/${user.id}/password`, {
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
 
+      setPasswordError("");
+      setPasswordSuccess("Lozinka uspješno promijenjena");
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordMode(false);
+    } catch (error: any) {
+      setPasswordSuccess("");
+
+      const data = error.response?.data;
+
+      if (data?.errors?.length) {
+        setPasswordError(data.errors[0].message);
+      } else if (data?.message) {
+        setPasswordError(data.message);
+      } else {
+        setPasswordError("Greška pri promjeni lozinke");
+      }
+    }
+  };
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -97,6 +131,71 @@ export default function UserProfile({ user }: any) {
                   className={styles.btnSecondary}
                 >
                   Otkaži
+                </button>
+              </div>
+            </div>
+          )}
+          {!passwordMode ? (
+            <>
+              {passwordSuccess && (
+                <p className={styles.success}>{passwordSuccess}</p>
+              )}
+
+              <button
+                onClick={() => {
+                  setPasswordError("");
+                  setPasswordSuccess("");
+                  setPasswordMode(true);
+                }}
+                className={styles.btnPrimary}
+              >
+                Promijeni lozinku
+              </button>
+            </>
+          ) : (
+            <div className={styles.form}>
+              <input
+                type="password"
+                placeholder="Trenutna lozinka"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+
+              <input
+                type="password"
+                placeholder="Nova lozinka"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+
+              <input
+                type="password"
+                placeholder="Potvrdi novu lozinku"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+              {passwordError && <p className={styles.error}>{passwordError}</p>}
+
+              <div className={styles.row}>
+                <button
+                  onClick={handleChangePassword}
+                  className={styles.btnPrimary}
+                >
+                  Spremi
+                </button>
+
+                <button
+                  onClick={() => {
+                    setPasswordMode(false);
+                    setPasswordError("");
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                  }}
+                  className={styles.btnSecondary}
+                >
+                  Odustani
                 </button>
               </div>
             </div>

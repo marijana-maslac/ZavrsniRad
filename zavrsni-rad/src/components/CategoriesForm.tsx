@@ -110,7 +110,7 @@ const CategoriesAdmin = () => {
       <div className={styles.table}>
         <div className={styles.tableHeader}>
           <span>#</span>
-          <span>Naziv</span>
+          <span>Naziv kategorije</span>
           <span>Recepata</span>
           <span>Akcije</span>
         </div>

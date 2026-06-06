@@ -37,6 +37,7 @@
 }
 
 .btnPrimary {
+  margin-top: 10px;
   background: #d57f07;
   color: white;
   border: none;
@@ -85,4 +86,13 @@
 
 .danger {
   border: 1px solid #ffd0d0;
+}
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.success {
+  color: green;
+  margin-top: 10px;
 }

@@ -6,10 +6,10 @@ export const userSchema = z.object({
   email: z.email("Invalid email adress"),
   password: z
     .string()
-    .min(6, "Password must have at least 8 characters")
+    .min(8, "Password must have at least 8 characters")
     .max(255, "Password is too long")
     .regex(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/,
+      /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/,
       "Password must contain uppercase, lowercase, number",
     ),
 });
