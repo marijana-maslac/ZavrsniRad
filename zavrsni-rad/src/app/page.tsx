@@ -16,19 +16,22 @@ export default async function Home() {
     },
   });
 
-  const topRated = await prisma.recipe.findMany({
-    take: 6,
+  const recipes = await prisma.recipe.findMany({
     include: {
       ratings: true,
     },
   });
 
-  const ratedWithAvg = topRated
+  const ratedWithAvg = recipes
     .map((r) => ({
       ...r,
-      avg: r.ratings.reduce((s, x) => s + x.value, 0) / (r.ratings.length || 1),
+      avg:
+        r.ratings.length > 0
+          ? r.ratings.reduce((s, x) => s + x.value, 0) / r.ratings.length
+          : 0,
     }))
-    .sort((a, b) => b.avg - a.avg);
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 6);
 
   const categories = await prisma.category.findMany();
 

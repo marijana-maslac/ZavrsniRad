@@ -299,16 +299,18 @@ const RecipeForm = ({ recipe }: Props) => {
                   className={styles.select}
                 >
                   <option value="G">G</option>
+                  <option value="DAG">DAG</option>
                   <option value="KG">KG</option>
                   <option value="ML">ML</option>
                   <option value="DL">DL</option>
                   <option value="L">L</option>
                   <option value="KOM">KOM</option>
+                  <option value="TBSP">TBSP</option>
+                  <option value="TSP">TSP</option>
                 </select>
 
                 <button type="button" onClick={() => removeIngredient(index)}>
-                  {" "}
-                  Ukloni{" "}
+                  Ukloni
                 </button>
               </div>
             ))}
