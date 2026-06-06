@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Tooltip } from "recharts";
 
 type Props = {
   data: { name: string; value: number }[];
@@ -17,7 +17,7 @@ const getColor = (name: string) => {
 
   const hue = hash % 360;
 
-  return `hsl(${hue}, 90%, 60%)`;
+  return `hsl(${hue}, 90%, 50%)`;
 };
 
 export default function CategoryPieChart({ data }: Props) {
@@ -37,13 +37,12 @@ export default function CategoryPieChart({ data }: Props) {
           nameKey="name"
           cx="50%"
           cy="50%"
-          outerRadius={120}
+          outerRadius={160}
+          isAnimationActive={false}
           label={({ name, value }) => `${name} (${value})`}
-          fill="#8884d8"
         />
 
         <Tooltip />
-        <Legend />
       </PieChart>
     </div>
   );

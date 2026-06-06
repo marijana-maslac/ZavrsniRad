@@ -4,6 +4,7 @@ import Link from "next/link";
 import prisma from "../../../prisma/db";
 import CategoryPieChart from "@/components/CategoryPieChart";
 import options from "@/app/api/auth/[...nextauth]/options";
+import styles from "./admin.module.css";
 
 export default async function AdminPage() {
   const session = await getServerSession(options);
@@ -78,37 +79,59 @@ export default async function AdminPage() {
     .sort((a, b) => b.favCount - a.favCount);
   return (
     <div>
-      <h1>Admin panel</h1>
-      <Link href="/admin/categories">
-        Popis kategorija recepata ({categoriesCount})
-      </Link>
-      <CategoryPieChart data={chartData} />
-      <br></br> <hr />
-      <p>Ukupan broj recepata: {totalRecipes}</p>
-      <br></br> <hr />
-      <Link href="/admin/users">Popis korisnika ({usersCount})</Link>
-      <hr />
-      <h2>Top 5 najbolje ocjenjenih recepata</h2>
-      <ol>
-        {sortedRatings.map((r) => (
-          <li key={r.id}>
-            <Link href={`/recipes/${r.id}`}>
-              {r.title} ({r.avg.toFixed(1)})
-            </Link>
-          </li>
-        ))}
-      </ol>{" "}
-      <hr />
-      <h2>Top 5 omiljenih recepata</h2>
-      <ol>
-        {sortedFavorites.map((r) => (
-          <li key={r.id}>
-            <Link href={`/recipes/${r.id}`}>
-              {r.title} ❤️ ({r.favCount})
-            </Link>
-          </li>
-        ))}
-      </ol>
+      <div className={styles.statsGrid}>
+        <div className={styles.card}>
+          <h3>Recepti</h3>
+          <p>{totalRecipes}</p>
+        </div>
+
+        <div className={styles.card}>
+          <h3>Korisnici</h3>
+          <p>{usersCount}</p>
+        </div>
+
+        <div className={styles.card}>
+          <h3>Kategorije</h3>
+          <p>{categoriesCount}</p>
+        </div>
+      </div>
+      <div className={styles.dashboardGrid}>
+        <div className={styles.chartCard}>
+          <CategoryPieChart data={chartData} />
+        </div>
+
+        <div className={styles.sideCards}>
+          <div className={styles.topCard}>
+            <h2>⭐ Top 5 ocijenjenih</h2>
+
+            <ol>
+              {sortedRatings.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/recipes/${r.id}`}>
+                    <span>{r.title}</span>
+                    <strong>{r.avg.toFixed(1)}</strong>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className={styles.topCard}>
+            <h2>❤️ Top 5 omiljenih</h2>
+
+            <ol>
+              {sortedFavorites.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/recipes/${r.id}`}>
+                    <span>{r.title}</span>
+                    <strong>{r.favCount}</strong>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

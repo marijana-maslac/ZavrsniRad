@@ -39,7 +39,7 @@ const MainNav = async () => {
         )}
         {session?.user.role === "ADMIN" && (
           <Link className={styles.link} href="/admin">
-            Admin Panel
+            Administracijska ploča
           </Link>
         )}
 

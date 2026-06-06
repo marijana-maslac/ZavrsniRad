@@ -63,10 +63,6 @@ export async function PATCH(
       }
     }
 
-    for (const step of existingRecipe.steps) {
-      if (step.image) deleteImage(step.image);
-    }
-
     await prisma.step.deleteMany({
       where: { recipeId },
     });
