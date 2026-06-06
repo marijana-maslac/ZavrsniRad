@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import styles from "../styles/CategoriesForm.module.css";
 
 type Category = {
   id: number;
@@ -88,65 +89,95 @@ const CategoriesAdmin = () => {
     <div>
       <h2>Admin kategorije</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={styles.createForm}>
         <input
           type="text"
           placeholder="Nova kategorija"
           value={name}
+          className={styles.input}
           onChange={(e) => setName(e.target.value)}
         />
-        <button type="submit">Dodaj</button>
+        <button type="submit" className={styles.addBtn}>
+          Dodaj
+        </button>
       </form>
 
       {success && <p>{success}</p>}
       {error && <p>{error}</p>}
 
-      <h3>Postojeće kategorije</h3>
+      <h3 className={styles.tableTitle}>Postojeće kategorije</h3>
 
-      {categories.map((cat, index) => (
-        <div key={cat.id}>
-          {" "}
-          <span>{index + 1}. </span>
-          {editingId === cat.id ? (
-            <>
-              <input
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-              />
-              <button onClick={() => saveEdit(cat.id)}>Spremi</button>
-              <button onClick={cancelEdit}>Odustani</button>
-            </>
-          ) : (
-            <>
-              <span>
-                <Link href={`/recipes?categories=${cat.name}`}>
-                  <span>
-                    {cat.name} ({cat._count?.recipes ?? 0})
-                  </span>
-                </Link>{" "}
-              </span>{" "}
-              {cat.name !== "RAZNO" && (
+      <div className={styles.table}>
+        <div className={styles.tableHeader}>
+          <span>#</span>
+          <span>Naziv</span>
+          <span>Recepata</span>
+          <span>Akcije</span>
+        </div>
+
+        {categories.map((cat, index) => (
+          <div key={cat.id} className={styles.row}>
+            <span>{index + 1}</span>
+
+            <span>
+              {editingId === cat.id ? (
+                <input
+                  className={styles.editInput}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                />
+              ) : (
+                <Link href={`/recipes?categories=${cat.name}`}>{cat.name}</Link>
+              )}
+            </span>
+
+            <span>{cat._count?.recipes ?? 0}</span>
+
+            <div className={styles.actions}>
+              {editingId === cat.id ? (
                 <>
-                  <button onClick={() => startEdit(cat)}> Uredi</button>
                   <button
-                    onClick={() => {
-                      if (
-                        confirm(
-                          "Jesi li siguran da želiš obrisati ovu kategoriju?",
-                        )
-                      ) {
-                        handleDelete(cat.id);
-                      }
-                    }}
+                    className={styles.saveBtn}
+                    onClick={() => saveEdit(cat.id)}
                   >
-                    Obriši
+                    Spremi
+                  </button>
+
+                  <button className={styles.cancelBtn} onClick={cancelEdit}>
+                    Odustani
                   </button>
                 </>
+              ) : (
+                cat.name !== "RAZNO" && (
+                  <>
+                    <button
+                      className={styles.editBtn}
+                      onClick={() => startEdit(cat)}
+                    >
+                      Uredi
+                    </button>
+
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => {
+                        if (
+                          confirm(
+                            "Jesi li siguran da želiš obrisati ovu kategoriju?",
+                          )
+                        ) {
+                          handleDelete(cat.id);
+                        }
+                      }}
+                    >
+                      Obriši
+                    </button>
+                  </>
+                )
               )}
-            </>
-          )}
-        </div>
-      ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import prisma from "../../../../prisma/db";
+import styles from "./page.module.css";
 
 interface Params {
   params: Promise<{ id?: string }>;
@@ -24,7 +25,13 @@ const AuthorPage = async ({ params }: Params) => {
   const user = await prisma.user.findUnique({
     where: { id: Number(authorId) },
     include: {
-      recipes: true,
+      recipes: {
+        include: {
+          ratings: true,
+          favorites: true,
+          comments: true,
+        },
+      },
       _count: {
         select: {
           recipes: true,
@@ -32,16 +39,52 @@ const AuthorPage = async ({ params }: Params) => {
       },
     },
   });
+  const totalFavorites =
+    user?.recipes.reduce((sum, recipe) => sum + recipe.favorites.length, 0) ??
+    0;
+
+  const totalComments =
+    user?.recipes.reduce((sum, recipe) => sum + recipe.comments.length, 0) ?? 0;
+  const allRatings = user?.recipes.flatMap((recipe) => recipe.ratings) ?? [];
+
+  const averageRating =
+    allRatings.length > 0
+      ? allRatings.reduce((sum, r) => sum + r.value, 0) / allRatings.length
+      : 0;
 
   return (
-    <div>
-      <h1>Recepti autora {user?.username}</h1>
-      <p>Broj recepata: {user?._count.recipes}</p>
-      {recipes.map((r) => (
-        <div key={r.id}>
-          <a href={`/recipes/${r.id}`}>{r.title}</a>
+    <div className={styles.page}>
+      <div className={styles.profileCard}>
+        <h1>👨‍🍳 {user?.username}</h1>
+        <p>Broj recepata: {user?._count.recipes}</p>
+        <p>Član od: {user?.createdAt.toLocaleDateString("hr-HR")}</p>
+        <div className={styles.stats}>
+          <div className={styles.statCard}>
+            <br></br>
+            {totalFavorites} ❤️ recepata autora je {user?.username} spremljeno
+          </div>
+
+          <div className={styles.statCard}>
+            {averageRating.toFixed(1)} ⭐ Prosječna ocjena od svih recepata
+            autora {user?.username}
+          </div>
+
+          <div className={styles.statCard}>
+            {totalComments} 💬 Ukupan broj komentara na stranici
+          </div>
         </div>
-      ))}
+      </div>
+
+      <div className={styles.recipesGrid}>
+        {recipes.map((r) => (
+          <a key={r.id} href={`/recipes/${r.id}`} className={styles.recipeCard}>
+            <h3>{r.title}</h3>
+            {r.image && (
+              <img src={r.image} alt={r.title} className={styles.recipeImage} />
+            )}
+          </a>
+        ))}
+      </div>
     </div>
   );
 };

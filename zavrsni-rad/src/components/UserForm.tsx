@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import styles from "../styles/UserForm.module.css";
 
 type User = {
   id: number;
@@ -38,32 +39,46 @@ export default function UsersAdmin() {
   };
 
   return (
-    <div>
+    <div className={styles.page}>
       <h2>Korisnici</h2>
 
-      {users.map((user, index) => (
-        <div key={user.id}>
-          <span>{index + 1}. </span>
+      {error && <p className={styles.error}>{error}</p>}
 
-          <Link href={`/users/${user.id}`}>{user.username}</Link>
-
-          <span> ({user._count?.recipes ?? 0})</span>
-
-          {session?.user?.id !== user.id && (
-            <button
-              onClick={() => {
-                if (confirm("Obrisati korisnika?")) {
-                  handleDelete(user.id);
-                }
-              }}
-            >
-              Obriši
-            </button>
-          )}
+      <div className={styles.table}>
+        <div className={styles.tableHeader}>
+          <span>#</span>
+          <span>Korisničko ime</span>
+          <span>Recepata</span>
+          <span>Akcije</span>
         </div>
-      ))}
 
-      {error && <p>{error}</p>}
+        {users.map((user, index) => (
+          <div key={user.id} className={styles.row}>
+            <span>{index + 1}</span>
+
+            <Link href={`/users/${user.id}`} className={styles.userLink}>
+              {user.username}
+            </Link>
+
+            <span>{user._count?.recipes ?? 0}</span>
+
+            <div className={styles.actions}>
+              {session?.user?.id !== user.id && (
+                <button
+                  className={styles.deleteBtn}
+                  onClick={() => {
+                    if (confirm("Obrisati korisnika?")) {
+                      handleDelete(user.id);
+                    }
+                  }}
+                >
+                  Obriši
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

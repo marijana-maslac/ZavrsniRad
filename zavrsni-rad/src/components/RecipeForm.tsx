@@ -82,7 +82,6 @@ const RecipeForm = ({ recipe }: Props) => {
             removeImage: false,
           }))
         : [],
-      // : [{ description: "", image: undefined, removeImage: false }],
     });
   }, [recipe, categories, form]);
 
