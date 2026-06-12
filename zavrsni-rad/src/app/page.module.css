@@ -136,7 +136,7 @@
   gap: 20px;
 }
 
-.categoryPill {
+.categoryCard {
   height: 180px;
 
   display: flex;
@@ -156,7 +156,7 @@
   transition: all 0.25s ease;
 }
 
-.categoryPill:hover {
+.categoryCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 10px rgba(232, 197, 132, 0.829);
 }

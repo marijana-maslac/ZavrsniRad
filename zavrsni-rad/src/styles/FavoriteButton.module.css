@@ -5,15 +5,19 @@
   border: none;
   border-radius: 999px;
   background: none;
-
   font-size: 25px;
   font-weight: 600;
-
   cursor: pointer;
-
   transition: all 0.2s ease;
 }
 
-.favoriteButton:hover:not(:disabled) {
-  background: rgba(240, 229, 195, 0.67);
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.error {
+  min-height: 18px;
+  margin-top: 8px;
+  color: red;
 }

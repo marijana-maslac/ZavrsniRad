@@ -43,6 +43,7 @@ export default function UserProfile({ user }: any) {
       alert("Greška pri brisanju računa");
     }
   };
+
   const handleChangePassword = async () => {
     try {
       await axios.patch(`/api/users/${user.id}/password`, {
@@ -210,20 +211,19 @@ export default function UserProfile({ user }: any) {
           )}
 
           <div className={styles.recipes}>
-            {user.recipes.map((r: any) => (
+            {user.recipes.map((recipe: any) => (
               <Link
-                key={r.id}
-                href={`/recipes/${r.id}`}
+                key={recipe.id}
+                href={`/recipes/${recipe.id}`}
                 className={styles.recipeCard}
               >
-                <h3>{r.title}</h3>
+                <h3>{recipe.title}</h3>
                 <span>➡️ otvori</span>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* DANGER ZONE */}
         {user.role !== "ADMIN" && (
           <div className={`${styles.card} ${styles.danger}`}>
             <h2>⚠️ Opasna zona</h2>

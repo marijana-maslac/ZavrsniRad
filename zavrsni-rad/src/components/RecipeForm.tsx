@@ -251,25 +251,27 @@ const RecipeForm = ({ recipe }: Props) => {
           <div className={styles.col}>
             <div className={styles.sectionTitle}>Kategorije</div>
 
-            {categories.map((cat) => (
-              <label key={cat.id} className={styles.checkboxRow}>
+            {categories.map((category) => (
+              <label key={category.id} className={styles.checkboxRow}>
                 <input
                   type="checkbox"
-                  checked={(form.watch("categories") ?? []).includes(cat.id)}
+                  checked={(form.watch("categories") ?? []).includes(
+                    category.id,
+                  )}
                   onChange={(e) => {
                     const current = form.getValues("categories") ?? [];
 
                     if (e.target.checked) {
-                      form.setValue("categories", [...current, cat.id]);
+                      form.setValue("categories", [...current, category.id]);
                     } else {
                       form.setValue(
                         "categories",
-                        current.filter((id: number) => id !== cat.id),
+                        current.filter((id: number) => id !== category.id),
                       );
                     }
                   }}
                 />
-                {cat.name}
+                {category.name}
               </label>
             ))}
           </div>
@@ -321,7 +323,6 @@ const RecipeForm = ({ recipe }: Props) => {
                 appendIngredient({ name: "", amount: 0, unit: "G" })
               }
             >
-              {" "}
               + Dodaj sastojak
             </button>
           </div>

@@ -3,6 +3,14 @@ import prisma from "../../prisma/db";
 import styles from "./page.module.css";
 
 export default async function Home() {
+  const categories = await prisma.category.findMany();
+
+  const recipes = await prisma.recipe.findMany({
+    include: {
+      ratings: true,
+    },
+  });
+
   const topFavorites = await prisma.recipe.findMany({
     take: 6,
     orderBy: {
@@ -11,29 +19,21 @@ export default async function Home() {
       },
     },
     include: {
-      categories: true,
       _count: { select: { favorites: true } },
     },
   });
 
-  const recipes = await prisma.recipe.findMany({
-    include: {
-      ratings: true,
-    },
-  });
-
   const ratedWithAvg = recipes
-    .map((r) => ({
-      ...r,
+    .map((recipe) => ({
+      ...recipe,
       avg:
-        r.ratings.length > 0
-          ? r.ratings.reduce((s, x) => s + x.value, 0) / r.ratings.length
+        recipe.ratings.length > 0
+          ? recipe.ratings.reduce((s, x) => s + x.value, 0) /
+            recipe.ratings.length
           : 0,
     }))
-    .sort((a, b) => b.avg - a.avg)
+    .sort((a, b) => b.avg - a.avg || b.ratings.length - a.ratings.length)
     .slice(0, 6);
-
-  const categories = await prisma.category.findMany();
 
   return (
     <div className={styles.page}>
@@ -60,7 +60,7 @@ export default async function Home() {
       <section className={styles.features}>
         <div className={styles.feature}>
           <span className={styles.featureIcon}>📖</span>
-          <h3>Stotine recepata</h3>
+          <h3>Mnogo recepata</h3>
           <p>Pronađi inspiraciju za svaki obrok na jednom mjestu.</p>
         </div>
 
@@ -82,17 +82,18 @@ export default async function Home() {
           <p>Kreiraj i organiziraj svoju zbirku omiljenih jela.</p>
         </div>
       </section>
+
       <section className={styles.section}>
         <h2>Kategorije</h2>
 
         <div className={styles.categoryGrid}>
-          {categories.map((cat) => (
+          {categories.map((category) => (
             <Link
-              key={cat.id}
-              href={`/recipes?categories=${cat.name}`}
-              className={styles.categoryPill}
+              key={category.id}
+              href={`/recipes?categories=${category.name}`}
+              className={styles.categoryCard}
             >
-              {cat.name}
+              {category.name}
             </Link>
           ))}
         </div>
@@ -102,18 +103,18 @@ export default async function Home() {
         <h2>❤️ Najomiljeniji</h2>
 
         <div className={styles.cardGrid}>
-          {topFavorites.map((r) => (
+          {topFavorites.map((rating) => (
             <Link
-              key={r.id}
-              href={`/recipes/${r.id}`}
+              key={rating.id}
+              href={`/recipes/${rating.id}`}
               className={styles.recipeCard}
               style={{
-                backgroundImage: `url(${r.image || "/food-placeholder.jpg"})`,
+                backgroundImage: `url(${rating.image || "/food-placeholder.jpg"})`,
               }}
             >
               <div className={styles.overlay}>
-                <h3>{r.title}</h3>
-                <p>❤️ {r._count.favorites}</p>
+                <h3>{rating.title}</h3>
+                <p>❤️ {rating._count.favorites}</p>
               </div>
             </Link>
           ))}
@@ -124,18 +125,18 @@ export default async function Home() {
         <h2>⭐ Najbolje ocijenjeni</h2>
 
         <div className={styles.cardGrid}>
-          {ratedWithAvg.map((r) => (
+          {ratedWithAvg.map((recipe) => (
             <Link
-              key={r.id}
-              href={`/recipes/${r.id}`}
+              key={recipe.id}
+              href={`/recipes/${recipe.id}`}
               className={styles.recipeCard}
               style={{
-                backgroundImage: `url(${r.image || "/food-placeholder.jpg"})`,
+                backgroundImage: `url(${recipe.image || "/food-placeholder.jpg"})`,
               }}
             >
               <div className={styles.overlay}>
-                <h3>{r.title}</h3>
-                <p>⭐ {r.avg.toFixed(1)}</p>
+                <h3>{recipe.title}</h3>
+                <p>⭐ {recipe.avg.toFixed(1)}</p>
               </div>
             </Link>
           ))}

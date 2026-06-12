@@ -31,9 +31,9 @@ interface Props {
 }
 
 const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
-  const isOwner = session?.user?.id === recipe.author.id;
+  const isAuthor = session?.user?.id === recipe.author.id;
   const isAdmin = session?.user?.role === "ADMIN";
-  const canEdit = isOwner || isAdmin;
+  const canEdit = isAuthor || isAdmin;
 
   const [openComments, setOpenComments] = useState(false);
   const [commentCount, setCommentCount] = useState(
@@ -66,9 +66,9 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
           <p className={styles.description}>{recipe.description}</p>
           <div className={styles.categories}>
             <span>
-              {recipe.categories?.map((cat) => (
-                <span key={cat.id}>
-                  {cat.name} <br></br>
+              {recipe.categories?.map((category) => (
+                <span key={category.id}>
+                  {category.name} <br></br>
                 </span>
               ))}
             </span>
@@ -110,9 +110,10 @@ const RecipeDetails = ({ recipe, initialIsFavorite, session }: Props) => {
           <h2>Sastojci</h2>
           <br></br>
           <ul>
-            {recipe.ingredients.map((ing) => (
-              <li key={ing.id}>
-                {ing.name} {ing.amount ?? ""} {ing.unit ?? ""}
+            {recipe.ingredients.map((ingredient) => (
+              <li key={ingredient.id}>
+                {ingredient.name} {ingredient.amount ?? ""}{" "}
+                {ingredient.unit ?? ""}
               </li>
             ))}
           </ul>

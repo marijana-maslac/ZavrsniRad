@@ -24,9 +24,9 @@ export default async function AdminPage() {
       },
     },
   });
-  const chartData = categories.map((c) => ({
-    name: c.name,
-    value: c._count.recipes,
+  const chartData = categories.map((category) => ({
+    name: category.name,
+    value: category._count.recipes,
   }));
 
   const topRating = await prisma.rating.groupBy({
@@ -47,15 +47,15 @@ export default async function AdminPage() {
 
   const topRatedRecipes = await prisma.recipe.findMany({
     where: {
-      id: { in: topRating.map((t) => t.recipeId) },
+      id: { in: topRating.map((rating) => rating.recipeId) },
     },
   });
 
   const sortedRatings = topRatedRecipes
-    .map((r) => {
-      const match = topRating.find((t) => t.recipeId === r.id);
+    .map((recipe) => {
+      const match = topRating.find((rating) => rating.recipeId === recipe.id);
       return {
-        ...r,
+        ...recipe,
         avg: match?._avg.value ?? 0,
       };
     })
@@ -63,16 +63,18 @@ export default async function AdminPage() {
 
   const topFavoriteRecipes = await prisma.recipe.findMany({
     where: {
-      id: { in: topFavorites.map((t) => t.recipeId) },
+      id: { in: topFavorites.map((favorite) => favorite.recipeId) },
     },
   });
 
   const sortedFavorites = topFavoriteRecipes
-    .map((r) => {
-      const match = topFavorites.find((t) => t.recipeId === r.id);
+    .map((recipe) => {
+      const match = topFavorites.find(
+        (favorite) => favorite.recipeId === recipe.id,
+      );
 
       return {
-        ...r,
+        ...recipe,
         favCount: match?._count.recipeId ?? 0,
       };
     })
@@ -105,11 +107,11 @@ export default async function AdminPage() {
             <h2>⭐ Top 5 ocijenjenih</h2>
 
             <ol>
-              {sortedRatings.map((r) => (
-                <li key={r.id}>
-                  <Link href={`/recipes/${r.id}`}>
-                    <span>{r.title}</span>
-                    <strong>{r.avg.toFixed(1)}</strong>
+              {sortedRatings.map((recipe) => (
+                <li key={recipe.id}>
+                  <Link href={`/recipes/${recipe.id}`}>
+                    <span>{recipe.title}</span>
+                    <strong>{recipe.avg.toFixed(1)}</strong>
                   </Link>
                 </li>
               ))}
@@ -120,11 +122,11 @@ export default async function AdminPage() {
             <h2>❤️ Top 5 omiljenih</h2>
 
             <ol>
-              {sortedFavorites.map((r) => (
-                <li key={r.id}>
-                  <Link href={`/recipes/${r.id}`}>
-                    <span>{r.title}</span>
-                    <strong>{r.favCount}</strong>
+              {sortedFavorites.map((recipe) => (
+                <li key={recipe.id}>
+                  <Link href={`/recipes/${recipe.id}`}>
+                    <span>{recipe.title}</span>
+                    <strong>{recipe.favCount}</strong>
                   </Link>
                 </li>
               ))}
