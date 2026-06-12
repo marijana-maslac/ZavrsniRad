@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import styles from "../styles/FavoriteButton.module.css";
+
 interface Props {
   recipeId: number;
   initialIsFavorite?: boolean;
@@ -16,6 +17,7 @@ const FavoriteButton = ({ recipeId, initialIsFavorite = false }: Props) => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
+
   const handleToggle = async () => {
     if (!session) {
       setError("Moraš se prijaviti da bi spremio omiljene recepte.");
@@ -27,18 +29,18 @@ const FavoriteButton = ({ recipeId, initialIsFavorite = false }: Props) => {
 
       await axios.post("/api/favorites", { recipeId });
 
-      setIsFavorite((prev) => !prev);
+      setIsFavorite((previous) => !previous);
 
       router.refresh();
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div className={styles.wrapper}>
       <button
         onClick={handleToggle}
         disabled={loading}
@@ -46,7 +48,7 @@ const FavoriteButton = ({ recipeId, initialIsFavorite = false }: Props) => {
       >
         {isFavorite ? "❤️ " : "🤍 "}
       </button>
-      {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 };

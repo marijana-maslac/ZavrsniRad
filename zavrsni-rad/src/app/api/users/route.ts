@@ -27,6 +27,7 @@ export async function GET() {
 
   return NextResponse.json(users);
 }
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const validation = userSchema.safeParse(body);

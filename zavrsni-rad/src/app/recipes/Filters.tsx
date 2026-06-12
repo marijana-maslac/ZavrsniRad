@@ -36,7 +36,7 @@ export default function Filters({ categories }: { categories: Category[] }) {
     const exists = activeCategories.includes(name);
 
     const updated = exists
-      ? activeCategories.filter((c) => c !== name)
+      ? activeCategories.filter((category) => category !== name)
       : [...activeCategories, name];
 
     update("categories", updated);
@@ -81,16 +81,16 @@ export default function Filters({ categories }: { categories: Category[] }) {
         </button>
 
         <div className={styles.pills}>
-          {categories.map((c) => {
-            const active = activeCategories.includes(c.name);
+          {categories.map((category) => {
+            const active = activeCategories.includes(category.name);
 
             return (
               <button
-                key={c.id}
-                onClick={() => toggle(c.name)}
+                key={category.id}
+                onClick={() => toggle(category.name)}
                 className={`${styles.pill} ${active ? styles.active : ""}`}
               >
-                {c.name}
+                {category.name}
               </button>
             );
           })}

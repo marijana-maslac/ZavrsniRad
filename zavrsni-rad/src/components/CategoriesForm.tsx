@@ -22,8 +22,8 @@ const CategoriesAdmin = () => {
   const [success, setSuccess] = useState("");
 
   const fetchCategories = async () => {
-    const res = await axios.get("/api/categories");
-    setCategories(res.data);
+    const response = await axios.get("/api/categories");
+    setCategories(response.data);
   };
 
   useEffect(() => {
@@ -50,9 +50,9 @@ const CategoriesAdmin = () => {
     }
   };
 
-  const startEdit = (cat: Category) => {
-    setEditingId(cat.id);
-    setEditValue(cat.name);
+  const startEdit = (category: Category) => {
+    setEditingId(category.id);
+    setEditValue(category.name);
   };
 
   const cancelEdit = () => {
@@ -115,30 +115,32 @@ const CategoriesAdmin = () => {
           <span>Akcije</span>
         </div>
 
-        {categories.map((cat, index) => (
-          <div key={cat.id} className={styles.row}>
+        {categories.map((category, index) => (
+          <div key={category.id} className={styles.row}>
             <span>{index + 1}</span>
 
             <span>
-              {editingId === cat.id ? (
+              {editingId === category.id ? (
                 <input
                   className={styles.editInput}
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                 />
               ) : (
-                <Link href={`/recipes?categories=${cat.name}`}>{cat.name}</Link>
+                <Link href={`/recipes?categories=${category.name}`}>
+                  {category.name}
+                </Link>
               )}
             </span>
 
-            <span>{cat._count?.recipes ?? 0}</span>
+            <span>{category._count?.recipes ?? 0}</span>
 
             <div className={styles.actions}>
-              {editingId === cat.id ? (
+              {editingId === category.id ? (
                 <>
                   <button
                     className={styles.saveBtn}
-                    onClick={() => saveEdit(cat.id)}
+                    onClick={() => saveEdit(category.id)}
                   >
                     Spremi
                   </button>
@@ -148,11 +150,11 @@ const CategoriesAdmin = () => {
                   </button>
                 </>
               ) : (
-                cat.name !== "RAZNO" && (
+                category.name !== "RAZNO" && (
                   <>
                     <button
                       className={styles.editBtn}
-                      onClick={() => startEdit(cat)}
+                      onClick={() => startEdit(category)}
                     >
                       Uredi
                     </button>
@@ -165,7 +167,7 @@ const CategoriesAdmin = () => {
                             "Jesi li siguran da želiš obrisati ovu kategoriju?",
                           )
                         ) {
-                          handleDelete(cat.id);
+                          handleDelete(category.id);
                         }
                       }}
                     >

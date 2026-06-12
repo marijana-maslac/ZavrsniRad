@@ -26,7 +26,7 @@ export default async function Recipes({ searchParams }: Props) {
     orderBy: { name: "asc" },
   });
 
-  const cats =
+  const category =
     typeof sp.categories === "string" ? [sp.categories] : sp.categories || [];
 
   const where: any = {};
@@ -42,11 +42,11 @@ export default async function Recipes({ searchParams }: Props) {
     where.difficulty = sp.difficulty;
   }
 
-  if (cats.length > 0) {
+  if (category.length > 0) {
     where.categories = {
       some: {
         name: {
-          in: cats,
+          in: category,
         },
       },
     };
@@ -77,7 +77,7 @@ export default async function Recipes({ searchParams }: Props) {
       ],
     });
 
-    recipeOrder = ratings.map((r) => r.recipeId);
+    recipeOrder = ratings.map((recipe) => recipe.recipeId);
 
     if (recipeOrder.length > 0) {
       where.id = {

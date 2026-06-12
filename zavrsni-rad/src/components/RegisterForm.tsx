@@ -32,12 +32,11 @@ const RegisterForm = () => {
     setIsSubmitting(true);
     setServerError(null);
     try {
-      const res = await axios.post("/api/users", data);
-      console.log("Created user: ", res.data);
+      const response = await axios.post("/api/users", data);
+      console.log("Created user: ", response.data);
       router.push("/");
       router.refresh();
     } catch (error: any) {
-      console.error("Error creating user:", error);
       setServerError(
         error.response?.data?.message || "Greška pri kreiranju korisnika",
       );

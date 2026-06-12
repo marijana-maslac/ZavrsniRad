@@ -16,9 +16,9 @@ export default function CommentsModal({
   const { data: session } = useSession();
 
   const fetchComments = async () => {
-    const res = await axios.get(`/api/recipes/${recipeId}/comments`);
-    setComments(res.data);
-    setCommentCount(res.data.length);
+    const response = await axios.get(`/api/recipes/${recipeId}/comments`);
+    setComments(response.data);
+    setCommentCount(response.data.length);
   };
 
   useEffect(() => {
@@ -27,15 +27,17 @@ export default function CommentsModal({
 
   const submitComment = async () => {
     if (!content.trim()) return;
+
     let imagePath = null;
 
     if (image) {
       const formData = new FormData();
       formData.append("image", image);
 
-      const res = await axios.post("/api/upload", formData);
-      imagePath = res.data.filePath;
+      const response = await axios.post("/api/upload", formData);
+      imagePath = response.data.filePath;
     }
+
     const temp = {
       id: Date.now(),
       content,
@@ -57,15 +59,16 @@ export default function CommentsModal({
 
     fetchComments();
   };
+
   const deleteComment = async (id: number) => {
     await axios.delete(`/api/comments/${id}`);
 
-    setComments((prev) => {
-      const updated = prev.filter((c) => c.id !== id);
+    setComments((previous) => {
+      const updated = previous.filter((comment) => comment.id !== id);
 
       return updated;
     });
-    setCommentCount((prev: number) => prev - 1);
+    setCommentCount((previous: number) => previous - 1);
   };
 
   return (
@@ -84,23 +87,26 @@ export default function CommentsModal({
         </div>
 
         <div className={styles.body}>
-          {comments.map((c) => (
-            <div key={c.id} className={styles.commentCard}>
-              <div className={styles.username}>{c.user.username}</div>
-              <div>{c.content}</div>
+          {comments.map((comment) => (
+            <div key={comment.id} className={styles.commentCard}>
+              <div className={styles.username}>{comment.user.username}</div>
+              <div>{comment.content}</div>
 
-              {c.image && <img src={c.image} className={styles.img} />}
+              {comment.image && (
+                <img src={comment.image} className={styles.img} />
+              )}
 
               <div className={styles.date}>
-                {new Date(c.createdAt).toLocaleString()}
+                {new Date(comment.createdAt).toLocaleString()}
               </div>
 
-              {(session?.user?.id === c.user.id ||
+              {(session?.user?.id === comment.user.id ||
                 session?.user?.role === "ADMIN") && (
                 <button
                   className={styles.deleteBtn}
                   onClick={() => {
-                    if (confirm("Obrisati komentar?")) deleteComment(c.id);
+                    if (confirm("Obrisati komentar?"))
+                      deleteComment(comment.id);
                   }}
                 >
                   Obriši

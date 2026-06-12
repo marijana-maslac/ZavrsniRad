@@ -49,7 +49,8 @@ const AuthorPage = async ({ params }: Params) => {
 
   const averageRating =
     allRatings.length > 0
-      ? allRatings.reduce((sum, r) => sum + r.value, 0) / allRatings.length
+      ? allRatings.reduce((sum, recipe) => sum + recipe.value, 0) /
+        allRatings.length
       : 0;
 
   return (
@@ -58,10 +59,11 @@ const AuthorPage = async ({ params }: Params) => {
         <h1>👨‍🍳 {user?.username}</h1>
         <p>Broj recepata: {user?._count.recipes}</p>
         <p>Član od: {user?.createdAt.toLocaleDateString("hr-HR")}</p>
+
         <div className={styles.stats}>
           <div className={styles.statCard}>
             <br></br>
-            {totalFavorites} ❤️ recepata autora je {user?.username} spremljeno
+            {totalFavorites} ❤️ recepata autora {user?.username} je spremljeno
           </div>
 
           <div className={styles.statCard}>
@@ -76,11 +78,19 @@ const AuthorPage = async ({ params }: Params) => {
       </div>
 
       <div className={styles.recipesGrid}>
-        {recipes.map((r) => (
-          <a key={r.id} href={`/recipes/${r.id}`} className={styles.recipeCard}>
-            <h3>{r.title}</h3>
-            {r.image && (
-              <img src={r.image} alt={r.title} className={styles.recipeImage} />
+        {recipes.map((recipe) => (
+          <a
+            key={recipe.id}
+            href={`/recipes/${recipe.id}`}
+            className={styles.recipeCard}
+          >
+            <h3>{recipe.title}</h3>
+            {recipe.image && (
+              <img
+                src={recipe.image}
+                alt={recipe.title}
+                className={styles.recipeImage}
+              />
             )}
           </a>
         ))}

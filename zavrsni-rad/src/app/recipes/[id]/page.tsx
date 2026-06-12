@@ -15,9 +15,11 @@ const RecipePage = async ({ params }: Params) => {
   }
 
   const recipeId = parseInt(id);
+
   if (isNaN(recipeId)) {
     return <p>Nevažeći ID recepta.</p>;
   }
+
   const session = await getServerSession(options);
 
   let isFavorite = false;
@@ -32,6 +34,7 @@ const RecipePage = async ({ params }: Params) => {
 
     isFavorite = !!fav;
   }
+
   const recipe = await prisma.recipe.findUnique({
     where: { id: recipeId },
     include: {

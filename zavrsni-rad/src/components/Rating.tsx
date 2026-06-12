@@ -15,6 +15,7 @@ export default function Rating({ recipeId }: Props) {
   const [avg, setAvg] = useState(0);
   const [count, setCount] = useState(0);
   const [hoverValue, setHoverValue] = useState(0);
+
   useEffect(() => {
     fetchAverage();
   }, [recipeId]);
@@ -30,12 +31,14 @@ export default function Rating({ recipeId }: Props) {
     setAvg(res.data.average);
     setCount(res.data.count);
   };
+
   const fetchUserRating = async () => {
     if (!session) return;
 
     const res = await axios.get(`/api/recipes/${recipeId}/rating`);
     setValue(res.data.value);
   };
+
   const submitRating = async (v: number) => {
     if (!session) return;
 
