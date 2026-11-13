@@ -21,10 +21,8 @@ export const recipeSchema = z.object({
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Sastojak je obavezan"),
-      amount: z.number().min(0, "Mora biti 0 ili više").optional(),
-      unit: z
-        .enum(["G", "DAG", "KG", "ML", "DL", "L", "KOM", "TBSP", "TSP"])
-        .optional(),
+      amount: z.number().min(0, "Mora biti 0 ili više"),
+      unit: z.enum(["G", "DAG", "KG", "ML", "DL", "L", "KOM", "TBSP", "TSP"]),
     }),
   ),
   steps: z.array(
